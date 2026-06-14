@@ -3,52 +3,563 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vai Pagar</title>
+  <title>Vai Pagar 🐵</title>
+
+  <!-- Fontes (no head pra evitar problema de carregamento) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Firebase (compat, declarado no head — lição de CORS do Produlog) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
+    :root{
+      --selva:        #0d2818;
+      --selva-2:      #122f1d;
+      --casca:        #1c3a28;
+      --casca-claro:  #244a34;
+      --banana:       #ffd23f;
+      --banana-esc:   #e0a800;
+      --folha:        #4ade80;
+      --coral:        #ff6b4a;
+      --creme:        #f5f0e1;
+      --creme-soft:   #c9d6c4;
+      --borda:        rgba(245,240,225,.10);
+      --sombra:       0 8px 30px rgba(0,0,0,.35);
     }
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 48px 36px;
-      max-width: 440px;
-      backdrop-filter: blur(10px);
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{
+      font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, #1a4029 0%, transparent 60%),
+        linear-gradient(160deg, var(--selva) 0%, var(--selva-2) 100%);
+      background-attachment:fixed;
+      color:var(--creme);
+      min-height:100vh;
+      padding:0 0 120px;
     }
-    .emoji { font-size: 64px; margin-bottom: 16px; }
-    h1 { font-size: 32px; margin-bottom: 12px; font-weight: 700; }
-    .accent { color: #4ade80; }
-    p { color: #cbd5e1; line-height: 1.6; font-size: 16px; }
-    .badge {
-      display: inline-block;
-      margin-top: 24px;
-      padding: 6px 16px;
-      background: rgba(74, 222, 128, 0.15);
-      color: #4ade80;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
+    .wrap{max-width:560px;margin:0 auto;padding:0 16px;}
+
+    header{padding:28px 0 8px;text-align:center;}
+    .logo{font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;letter-spacing:-.5px;line-height:1;}
+    .logo .pagar{color:var(--banana);}
+    .sub{color:var(--creme-soft);font-size:13px;margin-top:4px;font-weight:600;}
+
+    .placar{
+      margin:20px 0 8px;
+      background:linear-gradient(135deg, var(--casca) 0%, var(--casca-claro) 100%);
+      border:1px solid var(--borda);border-radius:22px;padding:22px 20px;text-align:center;
+      box-shadow:var(--sombra);position:relative;overflow:hidden;
     }
-    .stamp { margin-top: 28px; font-size: 12px; color: #64748b; }
+    .placar::after{content:"🍌";position:absolute;font-size:90px;right:-14px;bottom:-22px;opacity:.10;transform:rotate(-18deg);}
+    .placar .rotulo{font-size:13px;color:var(--creme-soft);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+    .placar .valor{font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;color:var(--banana);line-height:1.05;margin-top:2px;}
+    .placar .obs{font-size:12px;color:var(--creme-soft);margin-top:4px;font-weight:600;}
+
+    .secao-titulo{display:flex;align-items:center;gap:8px;margin:22px 4px 12px;font-family:'Baloo 2',cursive;font-weight:700;font-size:18px;}
+    .secao-titulo .traco{flex:1;height:1px;background:var(--borda);}
+
+    .card{background:var(--casca);border:1px solid var(--borda);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:var(--sombra);transition:transform .12s ease;}
+    .card.rei{border-color:rgba(255,210,63,.45);box-shadow:0 0 0 1px rgba(255,210,63,.25),var(--sombra);}
+    .card-topo{display:flex;align-items:center;gap:12px;cursor:pointer;}
+    .pos{flex-shrink:0;width:26px;text-align:center;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:var(--creme-soft);}
+    .macaco-emoji{font-size:38px;flex-shrink:0;line-height:1;}
+    .macaco-info{flex:1;min-width:0;}
+    .macaco-nome{font-family:'Baloo 2',cursive;font-weight:700;font-size:18px;line-height:1.1;display:flex;align-items:center;gap:6px;}
+    .patente{display:inline-block;margin-top:3px;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;background:rgba(245,240,225,.08);color:var(--creme-soft);}
+    .saldo-box{text-align:right;flex-shrink:0;}
+    .saldo{font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;line-height:1;}
+    .saldo.deve{color:var(--coral);}
+    .saldo.quitado{color:var(--folha);}
+    .saldo.credito{color:var(--banana);}
+    .saldo-lbl{font-size:10px;color:var(--creme-soft);font-weight:700;text-transform:uppercase;}
+
+    .acoes{display:flex;gap:8px;margin-top:12px;}
+    .btn{border:none;border-radius:12px;padding:11px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;flex:1;transition:filter .12s,transform .08s;}
+    .btn:active{transform:scale(.97);}
+    .btn-pagar{background:var(--folha);color:#06351a;}
+    .btn-devo{background:rgba(255,107,74,.14);color:var(--coral);}
+    .btn-extrato{background:rgba(245,240,225,.07);color:var(--creme-soft);flex:0 0 46px;font-size:16px;}
+    .btn:hover{filter:brightness(1.06);}
+
+    .barra{height:7px;border-radius:99px;background:rgba(0,0,0,.25);margin-top:11px;overflow:hidden;}
+    .barra > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--banana),var(--folha));transition:width .5s ease;}
+
+    .extrato{display:none;margin-top:12px;border-top:1px dashed var(--borda);padding-top:10px;}
+    .extrato.aberto{display:block;}
+    .ext-vazio{font-size:13px;color:var(--creme-soft);text-align:center;padding:8px;font-weight:600;}
+    .ext-item{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid rgba(245,240,225,.05);}
+    .ext-item:last-child{border-bottom:none;}
+    .ext-ic{font-size:18px;}
+    .ext-desc{flex:1;min-width:0;}
+    .ext-desc b{font-size:14px;font-weight:700;}
+    .ext-desc small{display:block;font-size:11px;color:var(--creme-soft);font-weight:600;}
+    .ext-val{font-weight:800;font-size:14px;}
+    .ext-val.mais{color:var(--coral);}
+    .ext-val.menos{color:var(--folha);}
+    .ext-del{background:none;border:none;color:var(--creme-soft);opacity:.5;cursor:pointer;font-size:14px;padding:4px;}
+    .ext-del:hover{opacity:1;color:var(--coral);}
+
+    .card-admin{display:flex;gap:8px;margin-top:10px;}
+    .mini{background:none;border:none;color:var(--creme-soft);font-size:12px;font-weight:700;cursor:pointer;opacity:.7;}
+    .mini:hover{opacity:1;}
+
+    .vazio{text-align:center;padding:40px 20px;color:var(--creme-soft);}
+    .vazio .big{font-size:60px;}
+    .vazio p{margin-top:10px;font-weight:600;}
+
+    .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:var(--banana);color:#3d2c00;border:none;font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;padding:14px 26px;border-radius:999px;cursor:pointer;z-index:40;box-shadow:0 10px 30px rgba(255,210,63,.35);display:flex;align-items:center;gap:8px;}
+    .fab:active{transform:translateX(-50%) scale(.96);}
+
+    .overlay{position:fixed;inset:0;background:rgba(5,15,10,.72);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:60;}
+    .overlay.aberto{display:flex;}
+    .modal{background:var(--selva-2);border:1px solid var(--borda);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:sobe .22s ease;}
+    @keyframes sobe{from{transform:translateY(40px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+    .modal h3{font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;margin-bottom:4px;}
+    .modal .dica{color:var(--creme-soft);font-size:13px;margin-bottom:16px;font-weight:600;}
+    label.cl{display:block;font-size:13px;font-weight:800;margin:14px 0 6px;color:var(--creme-soft);}
+    input.cl,select.cl{width:100%;background:var(--casca);border:1px solid var(--borda);border-radius:12px;padding:13px 14px;color:var(--creme);font-size:16px;font-family:'Nunito',sans-serif;font-weight:700;}
+    input.cl:focus,select.cl:focus{outline:none;border-color:var(--banana);}
+    .emoji-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+    .emoji-pick button{background:var(--casca);border:1px solid var(--borda);border-radius:12px;font-size:24px;width:46px;height:46px;cursor:pointer;transition:transform .1s;}
+    .emoji-pick button.sel{border-color:var(--banana);background:rgba(255,210,63,.15);transform:scale(1.05);}
+    .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+    .quick button{background:var(--casca);border:1px solid var(--borda);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;color:var(--creme);cursor:pointer;}
+    .quick button:hover{border-color:var(--banana);}
+    .modal-acoes{display:flex;gap:10px;margin-top:22px;}
+    .modal-acoes .btn{padding:14px;font-size:15px;}
+    .btn-cancel{background:rgba(245,240,225,.07);color:var(--creme-soft);}
+    .btn-ok{background:var(--banana);color:#3d2c00;}
+    .btn-perigo{background:rgba(255,107,74,.15);color:var(--coral);}
+
+    .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--folha);color:#06351a;font-weight:800;font-size:15px;padding:14px 22px;border-radius:16px;z-index:90;max-width:90%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .35s cubic-bezier(.2,1.3,.4,1);}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    .setup{max-width:520px;margin:40px auto;padding:28px;background:var(--casca);border:1px solid var(--borda);border-radius:20px;}
+    .setup h2{font-family:'Baloo 2',cursive;font-size:24px;margin-bottom:10px;}
+    .setup p,.setup li{color:var(--creme-soft);font-weight:600;line-height:1.6;font-size:14px;}
+    .setup ol{margin:12px 0 0 18px;}
+    .setup code{background:var(--selva);padding:2px 6px;border-radius:6px;color:var(--banana);font-size:13px;}
+
+    footer{text-align:center;color:var(--creme-soft);font-size:11px;font-weight:600;opacity:.6;margin-top:30px;}
+
+    .banana-rain{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
+    .banana-rain span{position:absolute;top:-40px;font-size:30px;animation:cair linear forwards;}
+    @keyframes cair{to{transform:translateY(110vh) rotate(360deg);opacity:.9;}}
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="emoji">💸</div>
-    <h1>Vai <span class="accent">Pagar</span></h1>
-    <p>Controle de dívidas dos amigos.<br>Site no ar — app em construção. 🚧</p>
-    <div class="badge">✓ Deploy funcionando</div>
-    <div class="stamp">v14/06 ✓</div>
+
+  <div id="telaSetup" class="setup" style="display:none;">
+    <h2>🐵 Falta configurar o Firebase</h2>
+    <p>O app está no ar, mas ainda não está conectado ao banco. Cole o seu <code>firebaseConfig</code> no topo do arquivo, onde está escrito <code>COLE_AQUI</code>.</p>
+    <ol>
+      <li>Abra o <code>index.html</code> e ache o bloco <code>firebaseConfig</code> no começo do script.</li>
+      <li>Substitua os valores pelos do seu projeto Firebase.</li>
+      <li>Salve, suba no GitHub e recarregue com <b>Ctrl+Shift+R</b>.</li>
+    </ol>
   </div>
+
+  <div id="app" style="display:none;">
+    <div class="wrap">
+      <header>
+        <div class="logo">Vai <span class="pagar">Pagar</span> 🐵</div>
+        <div class="sub">A selva dos caloteiros • mural da tribo</div>
+      </header>
+
+      <div class="placar">
+        <div class="rotulo">A tribo te deve</div>
+        <div class="valor" id="totalGeral">R$ 0,00</div>
+        <div class="obs" id="totalObs">🍌 nenhuma banana pendurada ainda</div>
+      </div>
+
+      <div class="secao-titulo">🏆 Mural da Vergonha <span class="traco"></span></div>
+      <div id="lista"></div>
+    </div>
+
+    <button class="fab" onclick="abrirNovoMacaco()">🐒 Novo macaco</button>
+    <footer>Vai Pagar • v14/06 ✓ • na confiança, tudo fica no extrato 🍌</footer>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modalConteudo"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG DO FIREBASE  ⚠️  COLE O SEU AQUI
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyA5hKdKKi8RbawNKPcDvGxTo3BYoWJscjQ",
+  authDomain: "vaipagar-macacos.firebaseapp.com",
+  projectId: "vaipagar-macacos",
+  storageBucket: "vaipagar-macacos.firebasestorage.app",
+  messagingSenderId: "629800594234",
+  appId: "1:629800594234:web:df734c49c9af481c877e03"
+};
+/* ============================================================ */
+
+let db = null;
+let macacos = [];
+let lancamentos = [];
+let extratoAberto = {};
+
+const EMOJIS_MACACO = ["🐵","🐒","🦍","🦧","🙈","🙉","🙊"];
+const QUICK_DESC = [
+  {ic:"🍺",txt:"Cerveja"},{ic:"🍔",txt:"Lanche"},{ic:"🚗",txt:"Uber"},
+  {ic:"🍕",txt:"Rango"},{ic:"🎮",txt:"Jogo"},{ic:"☕",txt:"Café"},
+  {ic:"🎟️",txt:"Rolê"},{ic:"💸",txt:"Emprestado"}
+];
+const FRASES_PAGOU = [
+  "Boa, macaco! 🐒 Descendo da árvore das dívidas 🌴",
+  "Quase lá, primata! Já foi bem pior 💪",
+  "Isso! Cada banana conta 🍌",
+  "Tá saindo da jaula aos poucos, hein 🐵",
+  "Olha o macaco virando gente! 👏",
+  "Devagar e sempre o macaco quita 🐢",
+  "Mandou bem! A tribo agradece 🙌"
+];
+const FRASE_QUITOU = "MACACO LIVRE! 🎉🍌 Soltou das correntes!";
+
+function brl(v){ return "R$ " + (v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function saldoDoMacaco(id){
+  let s = 0;
+  for(const l of lancamentos){
+    if(l.macacoId !== id) continue;
+    s += (l.tipo === "divida") ? Number(l.valor) : -Number(l.valor);
+  }
+  return Math.round(s*100)/100;
+}
+function dividaTotalDoMacaco(id){
+  let d = 0;
+  for(const l of lancamentos){ if(l.macacoId===id && l.tipo==="divida") d += Number(l.valor); }
+  return d;
+}
+function patenteDe(saldo){
+  if(saldo <= 0)   return {txt:"Macaco Livre 😇", cls:"quitado"};
+  if(saldo <= 50)  return {txt:"Macaquinho Pendurado 🐒", cls:"deve"};
+  if(saldo <= 150) return {txt:"Macaco Véio Caloteiro 🙊", cls:"deve"};
+  if(saldo <= 300) return {txt:"Gorila Devedor 🦍", cls:"deve"};
+  return {txt:"King Kong do Calote 👑", cls:"deve"};
+}
+
+function render(){
+  const comSaldo = macacos.map(m => ({...m, saldo: saldoDoMacaco(m.id)}));
+  comSaldo.sort((a,b) => b.saldo - a.saldo);
+
+  let total = 0;
+  comSaldo.forEach(m => { if(m.saldo > 0) total += m.saldo; });
+  document.getElementById("totalGeral").textContent = brl(total);
+  const qtd = comSaldo.filter(m=>m.saldo>0).length;
+  document.getElementById("totalObs").textContent =
+    qtd === 0 ? "🍌 ninguém te deve nada (será?)" : "🍌 " + qtd + " macaco" + (qtd>1?"s":"") + " pendurado" + (qtd>1?"s":"") + " na sua conta";
+
+  const lista = document.getElementById("lista");
+  if(comSaldo.length === 0){
+    lista.innerHTML = '<div class="vazio"><div class="big">🌴</div><p>Selva vazia! Adicione o primeiro caloteiro da tribo.</p></div>';
+    return;
+  }
+
+  let html = "";
+  comSaldo.forEach((m, idx) => {
+    const ehRei = (idx === 0 && m.saldo > 0);
+    const pat = patenteDe(m.saldo);
+    let saldoCls = "deve", saldoLbl = "deve";
+    if(m.saldo === 0){ saldoCls="quitado"; saldoLbl="quitado"; }
+    else if(m.saldo < 0){ saldoCls="credito"; saldoLbl="você deve"; }
+
+    const dividaTot = dividaTotalDoMacaco(m.id);
+    const pago = dividaTot - Math.max(m.saldo,0);
+    const pct = dividaTot > 0 ? Math.min(100, Math.max(0, (pago/dividaTot)*100)) : (m.saldo<=0?100:0);
+    const aberto = extratoAberto[m.id];
+
+    html += ''
+    + '<div class="card ' + (ehRei?'rei':'') + '">'
+    +   '<div class="card-topo" onclick="toggleExtrato(\'' + m.id + '\')">'
+    +     '<div class="pos">' + (ehRei?'👑':'#'+(idx+1)) + '</div>'
+    +     '<div class="macaco-emoji">' + m.emoji + '</div>'
+    +     '<div class="macaco-info">'
+    +       '<div class="macaco-nome">' + escapeHtml(m.nome) + '</div>'
+    +       '<span class="patente">' + pat.txt + '</span>'
+    +     '</div>'
+    +     '<div class="saldo-box">'
+    +       '<div class="saldo ' + saldoCls + '">' + brl(Math.abs(m.saldo)) + '</div>'
+    +       '<div class="saldo-lbl">' + saldoLbl + '</div>'
+    +     '</div>'
+    +   '</div>'
+    +   (dividaTot>0 ? '<div class="barra"><i style="width:' + pct + '%"></i></div>' : '')
+    +   '<div class="acoes">'
+    +     '<button class="btn btn-pagar" onclick="abrirPagar(\'' + m.id + '\')">🍌 Paguei</button>'
+    +     '<button class="btn btn-devo" onclick="abrirDevo(\'' + m.id + '\')">＋ Devo mais</button>'
+    +     '<button class="btn btn-extrato" onclick="toggleExtrato(\'' + m.id + '\')">📜</button>'
+    +   '</div>'
+    +   '<div class="extrato ' + (aberto?'aberto':'') + '" id="ext-' + m.id + '">'
+    +     renderExtrato(m.id)
+    +     '<div class="card-admin">'
+    +       '<button class="mini" onclick="abrirEditarMacaco(\'' + m.id + '\')">✏️ editar macaco</button>'
+    +       '<button class="mini" onclick="excluirMacaco(\'' + m.id + '\')">🗑️ remover</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+  });
+  lista.innerHTML = html;
+}
+
+function renderExtrato(macacoId){
+  const itens = lancamentos
+    .filter(l => l.macacoId === macacoId)
+    .sort((a,b) => (b.data && b.data.seconds||0) - (a.data && a.data.seconds||0));
+  if(itens.length === 0) return '<div class="ext-vazio">Nenhum lançamento ainda 🍃</div>';
+  return itens.map(l => {
+    const ehDivida = l.tipo === "divida";
+    const data = (l.data && l.data.seconds) ? new Date(l.data.seconds*1000).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}) : "";
+    return ''
+    + '<div class="ext-item">'
+    +   '<div class="ext-ic">' + (l.icone || (ehDivida?'💸':'🍌')) + '</div>'
+    +   '<div class="ext-desc">'
+    +     '<b>' + escapeHtml(l.descricao || (ehDivida?'Nova dívida':'Pagamento')) + '</b>'
+    +     '<small>' + data + '</small>'
+    +   '</div>'
+    +   '<div class="ext-val ' + (ehDivida?'mais':'menos') + '">' + (ehDivida?'+':'−') + brl(Number(l.valor)) + '</div>'
+    +   '<button class="ext-del" onclick="excluirLancamento(\'' + l.id + '\')" title="Apagar">✕</button>'
+    + '</div>';
+  }).join("");
+}
+
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function toggleExtrato(id){
+  extratoAberto[id] = !extratoAberto[id];
+  const el = document.getElementById("ext-"+id);
+  if(el) el.classList.toggle("aberto", extratoAberto[id]);
+}
+
+const overlay = document.getElementById("overlay");
+const modalEl = document.getElementById("modalConteudo");
+function fecharModal(){ overlay.classList.remove("aberto"); modalEl.innerHTML = ""; }
+overlay.addEventListener("click", e => { if(e.target === overlay) fecharModal(); });
+
+let emojiSelecionado = EMOJIS_MACACO[0];
+
+function abrirNovoMacaco(){
+  emojiSelecionado = EMOJIS_MACACO[0];
+  modalEl.innerHTML = ''
+  + '<h3>🐒 Novo macaco na tribo</h3>'
+  + '<p class="dica">Quem é o novo caloteiro?</p>'
+  + '<label class="cl">Nome / apelido</label>'
+  + '<input class="cl" id="inNome" placeholder="Ex: Zé, Mateus, Primata-mor..." autocomplete="off">'
+  + '<label class="cl">Escolha o macaco</label>'
+  + '<div class="emoji-pick" id="pickEmoji">'
+  +   EMOJIS_MACACO.map((e,i)=>'<button class="' + (i===0?'sel':'') + '" onclick="selEmoji(\'' + e + '\',this)">' + e + '</button>').join("")
+  + '</div>'
+  + '<label class="cl">Quanto ele já te deve? (R$)</label>'
+  + '<input class="cl" id="inDivida" type="number" inputmode="decimal" placeholder="0,00" step="0.01">'
+  + '<div class="modal-acoes">'
+  +   '<button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>'
+  +   '<button class="btn btn-ok" onclick="salvarNovoMacaco()">Adicionar 🍌</button>'
+  + '</div>';
+  overlay.classList.add("aberto");
+  setTimeout(()=>document.getElementById("inNome").focus(),100);
+}
+function selEmoji(e, btn){
+  emojiSelecionado = e;
+  document.querySelectorAll("#pickEmoji button").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel");
+}
+async function salvarNovoMacaco(){
+  const nome = document.getElementById("inNome").value.trim();
+  const divida = parseFloat((document.getElementById("inDivida").value||"").replace(",","."))||0;
+  if(!nome){ alert("Dá um nome pro macaco 🐵"); return; }
+  try{
+    const ref = await db.collection("macacos").add({
+      nome, emoji: emojiSelecionado, criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(divida > 0){
+      await db.collection("lancamentos").add({
+        macacoId: ref.id, tipo:"divida", valor:divida, descricao:"Dívida inicial",
+        icone:"💸", data: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    fecharModal();
+  }catch(err){ alert("Erro ao salvar: "+err.message); }
+}
+
+function abrirEditarMacaco(id){
+  const m = macacos.find(x=>x.id===id); if(!m) return;
+  emojiSelecionado = m.emoji;
+  modalEl.innerHTML = ''
+  + '<h3>✏️ Editar macaco</h3>'
+  + '<label class="cl">Nome / apelido</label>'
+  + '<input class="cl" id="inNome" value="' + escapeHtml(m.nome) + '">'
+  + '<label class="cl">Macaco</label>'
+  + '<div class="emoji-pick" id="pickEmoji">'
+  +   EMOJIS_MACACO.map(e=>'<button class="' + (e===m.emoji?'sel':'') + '" onclick="selEmoji(\'' + e + '\',this)">' + e + '</button>').join("")
+  + '</div>'
+  + '<div class="modal-acoes">'
+  +   '<button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>'
+  +   '<button class="btn btn-ok" onclick="salvarEditarMacaco(\'' + id + '\')">Salvar</button>'
+  + '</div>';
+  overlay.classList.add("aberto");
+}
+async function salvarEditarMacaco(id){
+  const nome = document.getElementById("inNome").value.trim();
+  if(!nome){ alert("O macaco precisa de nome 🐵"); return; }
+  try{
+    await db.collection("macacos").doc(id).update({ nome, emoji: emojiSelecionado });
+    fecharModal();
+  }catch(err){ alert("Erro: "+err.message); }
+}
+async function excluirMacaco(id){
+  const m = macacos.find(x=>x.id===id);
+  if(!confirm("Remover " + (m?m.nome:"esse macaco") + " e todo o histórico dele?")) return;
+  try{
+    const snap = await db.collection("lancamentos").where("macacoId","==",id).get();
+    const batch = db.batch();
+    snap.forEach(d => batch.delete(d.ref));
+    batch.delete(db.collection("macacos").doc(id));
+    await batch.commit();
+    fecharModal();
+  }catch(err){ alert("Erro: "+err.message); }
+}
+
+let descSelecionada = {icone:"", txt:""};
+function abrirPagar(id){
+  const m = macacos.find(x=>x.id===id); if(!m) return;
+  descSelecionada = {icone:"🍌", txt:""};
+  const saldo = saldoDoMacaco(id);
+  modalEl.innerHTML = ''
+  + '<h3>🍌 ' + escapeHtml(m.nome) + ' pagou!</h3>'
+  + '<p class="dica">Saldo atual: <b>' + brl(saldo) + '</b></p>'
+  + '<label class="cl">Quanto pagou? (R$)</label>'
+  + '<input class="cl" id="inValor" type="number" inputmode="decimal" placeholder="0,00" step="0.01">'
+  + '<label class="cl">Referente a (opcional)</label>'
+  + '<input class="cl" id="inDesc" placeholder="Ex: parte do rango de sábado" autocomplete="off">'
+  + '<div class="quick">'
+  +   QUICK_DESC.map(q=>'<button onclick="setDesc(\'' + q.ic + '\',\'' + q.txt + '\')">' + q.ic + ' ' + q.txt + '</button>').join("")
+  + '</div>'
+  + '<div class="modal-acoes">'
+  +   '<button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>'
+  +   '<button class="btn btn-ok" onclick="confirmarPagamento(\'' + id + '\')">Abater 🍌</button>'
+  + '</div>';
+  overlay.classList.add("aberto");
+  setTimeout(()=>document.getElementById("inValor").focus(),100);
+}
+function abrirDevo(id){
+  const m = macacos.find(x=>x.id===id); if(!m) return;
+  descSelecionada = {icone:"💸", txt:""};
+  modalEl.innerHTML = ''
+  + '<h3>＋ ' + escapeHtml(m.nome) + ' deve mais</h3>'
+  + '<p class="dica">Pagou algo pra ele? Joga na conta 🐵</p>'
+  + '<label class="cl">Valor da nova dívida (R$)</label>'
+  + '<input class="cl" id="inValor" type="number" inputmode="decimal" placeholder="0,00" step="0.01">'
+  + '<label class="cl">Referente a (opcional)</label>'
+  + '<input class="cl" id="inDesc" placeholder="Ex: cobri o uber dele" autocomplete="off">'
+  + '<div class="quick">'
+  +   QUICK_DESC.map(q=>'<button onclick="setDesc(\'' + q.ic + '\',\'' + q.txt + '\')">' + q.ic + ' ' + q.txt + '</button>').join("")
+  + '</div>'
+  + '<div class="modal-acoes">'
+  +   '<button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>'
+  +   '<button class="btn btn-perigo" onclick="confirmarDivida(\'' + id + '\')">Adicionar dívida</button>'
+  + '</div>';
+  overlay.classList.add("aberto");
+  setTimeout(()=>document.getElementById("inValor").focus(),100);
+}
+function setDesc(ic, txt){
+  descSelecionada = {icone:ic, txt:txt};
+  const inp = document.getElementById("inDesc");
+  if(inp && !inp.value) inp.value = txt;
+}
+
+async function confirmarPagamento(id){
+  const valor = parseFloat((document.getElementById("inValor").value||"").replace(",","."))||0;
+  if(valor <= 0){ alert("Coloca um valor 🍌"); return; }
+  const desc = document.getElementById("inDesc").value.trim();
+  const novoSaldo = saldoDoMacaco(id) - valor;
+  try{
+    await db.collection("lancamentos").add({
+      macacoId:id, tipo:"pagamento", valor, descricao: desc || "Pagamento",
+      icone: descSelecionada.icone || "🍌", data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    fecharModal();
+    if(novoSaldo <= 0){
+      chuvaDeBananas();
+      mostrarToast(FRASE_QUITOU);
+    }else{
+      let frase = FRASES_PAGOU[Math.floor(Math.random()*FRASES_PAGOU.length)];
+      frase += "  Faltam " + brl(novoSaldo) + ".";
+      mostrarToast(frase);
+    }
+  }catch(err){ alert("Erro: "+err.message); }
+}
+async function confirmarDivida(id){
+  const valor = parseFloat((document.getElementById("inValor").value||"").replace(",","."))||0;
+  if(valor <= 0){ alert("Coloca um valor 💸"); return; }
+  const desc = document.getElementById("inDesc").value.trim();
+  try{
+    await db.collection("lancamentos").add({
+      macacoId:id, tipo:"divida", valor, descricao: desc || "Nova dívida",
+      icone: descSelecionada.icone || "💸", data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    fecharModal();
+    mostrarToast("Anotado! Mais uma banana na conta 🍌");
+  }catch(err){ alert("Erro: "+err.message); }
+}
+
+async function excluirLancamento(id){
+  if(!confirm("Apagar esse lançamento?")) return;
+  try{ await db.collection("lancamentos").doc(id).delete(); }
+  catch(err){ alert("Erro: "+err.message); }
+}
+
+let toastTimer = null;
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 3800);
+}
+function chuvaDeBananas(){
+  const cont = document.createElement("div");
+  cont.className = "banana-rain";
+  document.body.appendChild(cont);
+  for(let i=0;i<28;i++){
+    const b = document.createElement("span");
+    b.textContent = Math.random() > .25 ? "🍌" : "🎉";
+    b.style.left = (Math.random()*100) + "vw";
+    b.style.animationDuration = (1.6 + Math.random()*1.8) + "s";
+    b.style.animationDelay = (Math.random()*0.5) + "s";
+    b.style.fontSize = (22 + Math.random()*22) + "px";
+    cont.appendChild(b);
+  }
+  setTimeout(()=>cont.remove(), 3800);
+}
+
+function iniciar(){
+  if(firebaseConfig.apiKey === "COLE_AQUI"){
+    document.getElementById("telaSetup").style.display = "block";
+    return;
+  }
+  document.getElementById("app").style.display = "block";
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+
+  db.collection("macacos").onSnapshot(snap => {
+    macacos = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    render();
+  }, err => { console.error(err); mostrarToast("Erro de conexão 🙊"); });
+
+  db.collection("lancamentos").onSnapshot(snap => {
+    lancamentos = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    render();
+  }, err => { console.error(err); });
+}
+iniciar();
+</script>
 </body>
 </html>
