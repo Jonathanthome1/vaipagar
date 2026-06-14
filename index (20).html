@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vai Pagar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 48px 36px;
+      max-width: 440px;
+      backdrop-filter: blur(10px);
+    }
+    .emoji { font-size: 64px; margin-bottom: 16px; }
+    h1 { font-size: 32px; margin-bottom: 12px; font-weight: 700; }
+    .accent { color: #4ade80; }
+    p { color: #cbd5e1; line-height: 1.6; font-size: 16px; }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 6px 16px;
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .stamp { margin-top: 28px; font-size: 12px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">💸</div>
+    <h1>Vai <span class="accent">Pagar</span></h1>
+    <p>Controle de dívidas dos amigos.<br>Site no ar — app em construção. 🚧</p>
+    <div class="badge">✓ Deploy funcionando</div>
+    <div class="stamp">v14/06 ✓</div>
+  </div>
+</body>
+</html>
