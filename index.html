@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Vai Pagar 🐵</title>
 
   <!-- Fontes (no head pra evitar problema de carregamento) -->
@@ -28,6 +28,9 @@
       --creme-soft:   #c9d6c4;
       --borda:        rgba(245,240,225,.10);
       --sombra:       0 8px 30px rgba(0,0,0,.35);
+      /* cores novas só do blackjack */
+      --bj-azul:      #5aa9e6;
+      --bj-roxo:      #c58cf0;
     }
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     body{
@@ -38,14 +41,26 @@
       background-attachment:fixed;
       color:var(--creme);
       min-height:100vh;
-      padding:0 0 120px;
+      padding:env(safe-area-inset-top) 0 120px;
     }
+    body.aba-bj{padding-bottom:calc(30px + env(safe-area-inset-bottom));}
     .wrap{max-width:560px;margin:0 auto;padding:0 16px;}
 
     header{padding:28px 0 8px;text-align:center;}
     .logo{font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;letter-spacing:-.5px;line-height:1;}
     .logo .pagar{color:var(--banana);}
     .sub{color:var(--creme-soft);font-size:13px;margin-top:4px;font-weight:600;}
+
+    /* ---------- navegação entre abas ---------- */
+    .abas{display:flex;gap:4px;background:rgba(0,0,0,.22);border:1px solid var(--borda);
+      border-radius:999px;padding:4px;margin:18px 0 4px;}
+    .abas button{flex:1;border:none;background:none;cursor:pointer;color:var(--creme-soft);
+      font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;padding:9px 6px;border-radius:999px;
+      transition:background .15s,color .15s;}
+    .abas button[aria-selected="true"]{background:var(--casca-claro);color:var(--creme);}
+
+    .aba-conteudo{display:none;}
+    .aba-conteudo.ativa{display:block;}
 
     .placar{
       margin:20px 0 8px;
@@ -112,10 +127,11 @@
 
     .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:var(--banana);color:#3d2c00;border:none;font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;padding:14px 26px;border-radius:999px;cursor:pointer;z-index:40;box-shadow:0 10px 30px rgba(255,210,63,.35);display:flex;align-items:center;gap:8px;}
     .fab:active{transform:translateX(-50%) scale(.96);}
+    .fab.escondido{display:none;}
 
     .overlay{position:fixed;inset:0;background:rgba(5,15,10,.72);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:60;}
     .overlay.aberto{display:flex;}
-    .modal{background:var(--selva-2);border:1px solid var(--borda);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:sobe .22s ease;}
+    .modal{background:var(--selva-2);border:1px solid var(--borda);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;padding:24px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:sobe .22s ease;}
     @keyframes sobe{from{transform:translateY(40px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
     .modal h3{font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;margin-bottom:4px;}
     .modal .dica{color:var(--creme-soft);font-size:13px;margin-bottom:16px;font-weight:600;}
@@ -148,6 +164,131 @@
     .banana-rain{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden;}
     .banana-rain span{position:absolute;top:-40px;font-size:30px;animation:cair linear forwards;}
     @keyframes cair{to{transform:translateY(110vh) rotate(360deg);opacity:.9;}}
+
+    /* =========================================================
+       ABA BLACKJACK — tudo prefixado com bj- pra não colidir
+       ========================================================= */
+    .bj-sub{display:flex;gap:3px;background:rgba(0,0,0,.22);border:1px solid var(--borda);
+      border-radius:14px;padding:3px;margin:16px 0 0;}
+    .bj-sub button{flex:1;border:none;background:none;cursor:pointer;color:var(--creme-soft);
+      font-weight:800;font-size:13px;padding:8px 4px;border-radius:11px;font-family:'Nunito',sans-serif;}
+    .bj-sub button[aria-selected="true"]{background:var(--casca);color:var(--creme);}
+    .bj-tela{display:none;}
+    .bj-tela.ativa{display:block;}
+
+    .bj-placar{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:14px;
+      color:var(--creme-soft);font-size:13px;font-weight:700;}
+    .bj-placar b{font-family:'Baloo 2',cursive;font-size:22px;color:var(--banana);font-weight:800;}
+
+    .bj-mesa{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0 4px;}
+    .bj-quem{font-size:11px;letter-spacing:.14em;color:var(--creme-soft);font-weight:800;}
+    .bj-mao{display:flex;gap:8px;min-height:100px;align-items:center;}
+    .bj-carta{width:70px;height:98px;background:var(--creme);border-radius:11px;color:#17301f;
+      position:relative;flex:0 0 auto;box-shadow:0 4px 0 rgba(0,0,0,.3);
+      display:flex;align-items:center;justify-content:center;}
+    .bj-carta.vermelha{color:#c0392b;}
+    .bj-carta .n{font-family:'Baloo 2',cursive;font-weight:800;font-size:40px;line-height:1;}
+    .bj-carta .p{position:absolute;top:5px;left:7px;font-size:13px;font-weight:800;line-height:1;}
+    .bj-carta .p.br{top:auto;left:auto;bottom:5px;right:7px;transform:rotate(180deg);}
+    .bj-total{font-size:13px;color:var(--creme-soft);font-weight:700;margin-top:2px;}
+    .bj-total b{color:var(--creme);font-family:'Baloo 2',cursive;font-size:17px;}
+    .bj-espaco{height:12px;}
+
+    .bj-acoes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px;}
+    .bj-act{border:1.5px solid var(--borda);background:var(--casca);border-radius:14px;
+      padding:15px 8px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;
+      transition:transform .08s,filter .12s;}
+    .bj-act:active{transform:scale(.97);}
+    .bj-act:hover{filter:brightness(1.1);}
+    .bj-act[data-a="hit"]{color:var(--banana);}
+    .bj-act[data-a="stand"]{color:var(--folha);}
+    .bj-act[data-a="double"]{color:var(--bj-azul);}
+    .bj-act[data-a="split"]{color:var(--bj-roxo);}
+    .bj-act[data-a="surrender"]{color:var(--creme-soft);grid-column:1/-1;padding:12px;font-size:15px;}
+    .bj-act:disabled{opacity:.3;cursor:default;}
+    .bj-act i{display:block;font-style:normal;font-family:'Nunito',sans-serif;font-size:10px;
+      font-weight:700;color:var(--creme-soft);margin-top:2px;}
+
+    .bj-veredito{margin-top:14px;border:1px solid var(--borda);border-radius:18px;overflow:hidden;
+      background:var(--casca);box-shadow:var(--sombra);animation:sobe .2s ease;}
+    .bj-vtopo{padding:13px 15px;font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;
+      display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .bj-vtopo.ok{background:rgba(74,222,128,.14);color:var(--folha);}
+    .bj-vtopo.erro{background:rgba(255,107,74,.14);color:var(--coral);}
+    .bj-vtopo span{margin-left:auto;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--creme-soft);}
+    .bj-vcorpo{padding:13px 15px 15px;font-size:14.5px;line-height:1.55;font-weight:600;}
+    .bj-vcorpo p{margin:0 0 10px;}
+    .bj-vcorpo p:last-child{margin-bottom:0;}
+    .bj-custo{color:var(--creme-soft);font-size:13px;}
+    .bj-custo b{color:var(--coral);}
+    .bj-apertado{display:inline-block;font-size:11px;font-weight:800;color:var(--banana);
+      border:1px solid rgba(255,210,63,.4);border-radius:999px;padding:2px 10px;}
+
+    .bj-evs{display:flex;flex-direction:column;gap:5px;margin-top:12px;}
+    .bj-ev{display:grid;grid-template-columns:74px 1fr 54px;align-items:center;gap:8px;font-size:12px;}
+    .bj-ev .nm{font-weight:800;}
+    .bj-ev .tr{height:7px;background:rgba(0,0,0,.3);border-radius:99px;position:relative;overflow:hidden;}
+    .bj-ev .fl{position:absolute;top:0;bottom:0;border-radius:99px;}
+    .bj-ev .vl{text-align:right;color:var(--creme-soft);font-weight:700;}
+    .bj-nota{font-size:11.5px;color:var(--creme-soft);line-height:1.5;margin-top:10px;font-weight:600;opacity:.85;}
+
+    .bj-prox{width:100%;margin-top:12px;padding:15px;border-radius:14px;border:1px solid var(--borda);
+      background:var(--casca-claro);color:var(--creme);font-family:'Baloo 2',cursive;font-weight:800;
+      font-size:16px;cursor:pointer;}
+
+    .bj-rolagem{overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+    table.bj-tab{border-collapse:separate;border-spacing:2px;}
+    table.bj-tab th{font-size:11px;font-weight:800;color:var(--creme-soft);padding:2px 4px;}
+    table.bj-tab th.lin{text-align:right;min-width:40px;}
+    table.bj-tab td{width:29px;height:26px;text-align:center;font-size:11px;font-weight:800;
+      border-radius:6px;color:#0d2818;position:relative;}
+    td.bj-stand{background:var(--folha);}
+    td.bj-hit{background:var(--banana);}
+    td.bj-double{background:var(--bj-azul);}
+    td.bj-split{background:var(--bj-roxo);}
+    td.bj-surrender{background:var(--creme-soft);}
+    td.bj-apert::after{content:'';position:absolute;top:2px;right:2px;width:4px;height:4px;
+      border-radius:50%;background:#0d2818;opacity:.5;}
+    td.bj-errei{box-shadow:inset 0 0 0 2px var(--coral);}
+    .bj-legenda{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:11.5px;
+      color:var(--creme-soft);font-weight:700;}
+    .bj-legenda span{display:flex;align-items:center;gap:5px;}
+    .bj-legenda i{width:11px;height:11px;border-radius:3px;display:block;}
+
+    .bj-stat{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--borda);}
+    .bj-stat .l{font-size:14px;font-weight:800;min-width:92px;}
+    .bj-stat .tr{flex:1;height:8px;background:rgba(0,0,0,.28);border-radius:99px;overflow:hidden;}
+    .bj-stat .fl{height:100%;background:linear-gradient(90deg,var(--banana),var(--folha));border-radius:99px;transition:width .4s;}
+    .bj-stat .n{font-size:12.5px;color:var(--creme-soft);font-weight:700;min-width:64px;text-align:right;}
+    .bj-piores{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+    .bj-piores div{display:flex;gap:10px;align-items:baseline;font-size:13.5px;font-weight:700;
+      padding:8px 11px;background:var(--casca);border:1px solid var(--borda);border-radius:11px;}
+    .bj-piores .h{font-family:'Baloo 2',cursive;font-size:15px;}
+    .bj-piores .r{margin-left:auto;font-size:12px;color:var(--coral);}
+
+    .bj-seg{display:flex;gap:6px;flex-wrap:wrap;}
+    .bj-seg button{background:var(--casca);border:1px solid var(--borda);border-radius:11px;
+      padding:9px 13px;font-size:13px;font-weight:800;color:var(--creme-soft);cursor:pointer;
+      font-family:'Nunito',sans-serif;}
+    .bj-seg button[aria-pressed="true"]{border-color:var(--banana);background:rgba(255,210,63,.14);color:var(--creme);}
+    .bj-chave{display:flex;align-items:center;gap:10px;width:100%;padding:11px 0;
+      border-bottom:1px solid var(--borda);background:none;border-left:none;border-right:none;border-top:none;
+      color:var(--creme);font-size:14px;font-weight:700;cursor:pointer;text-align:left;
+      font-family:'Nunito',sans-serif;}
+    .bj-chave .sw{margin-left:auto;width:42px;height:25px;border-radius:999px;background:rgba(0,0,0,.3);
+      border:1px solid var(--borda);position:relative;flex:0 0 auto;}
+    .bj-chave .sw::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;
+      border-radius:50%;background:var(--creme-soft);transition:transform .15s,background .15s;}
+    .bj-chave[aria-pressed="true"] .sw{background:rgba(255,210,63,.2);border-color:var(--banana);}
+    .bj-chave[aria-pressed="true"] .sw::after{transform:translateX(17px);background:var(--banana);}
+
+    .bj-carregando{text-align:center;padding:50px 20px;color:var(--creme-soft);font-weight:700;font-size:14px;}
+    .bj-carregando[hidden]{display:none;}
+    .bj-vazio{color:var(--creme-soft);font-weight:600;font-size:13.5px;line-height:1.6;padding:14px 0;}
+    .bj-aviso{font-size:11.5px;color:var(--creme-soft);line-height:1.6;font-weight:600;
+      border-top:1px solid var(--borda);padding-top:14px;margin-top:18px;opacity:.85;}
+    .bj-apagar{background:none;border:none;color:var(--coral);font-weight:800;font-size:12.5px;
+      text-decoration:underline;cursor:pointer;margin-top:22px;font-family:'Nunito',sans-serif;}
   </style>
 </head>
 <body>
@@ -160,26 +301,135 @@
       <li>Substitua os valores pelos do seu projeto Firebase.</li>
       <li>Salve, suba no GitHub e recarregue com <b>Ctrl+Shift+R</b>.</li>
     </ol>
+    <p style="margin-top:14px;">A aba de treino de Blackjack funciona sem Firebase — ela é só sua e fica no aparelho.</p>
   </div>
 
   <div id="app" style="display:none;">
     <div class="wrap">
       <header>
         <div class="logo">Vai <span class="pagar">Pagar</span> 🐵</div>
-        <div class="sub">A selva dos caloteiros • mural da tribo</div>
+        <div class="sub" id="subtitulo">A selva dos caloteiros • mural da tribo</div>
       </header>
 
-      <div class="placar">
-        <div class="rotulo">A tribo te deve</div>
-        <div class="valor" id="totalGeral">R$ 0,00</div>
-        <div class="obs" id="totalObs">🍌 nenhuma banana pendurada ainda</div>
-      </div>
+      <nav class="abas" role="tablist">
+        <button role="tab" aria-selected="true"  data-aba="dividas">🍌 Dívidas</button>
+        <button role="tab" aria-selected="false" data-aba="blackjack">🃏 Blackjack</button>
+      </nav>
 
-      <div class="secao-titulo">🏆 Mural da Vergonha <span class="traco"></span></div>
-      <div id="lista"></div>
+      <!-- ================= ABA 1: DÍVIDAS (original) ================= -->
+      <section class="aba-conteudo ativa" id="aba-dividas">
+        <div class="placar">
+          <div class="rotulo">A tribo te deve</div>
+          <div class="valor" id="totalGeral">R$ 0,00</div>
+          <div class="obs" id="totalObs">🍌 nenhuma banana pendurada ainda</div>
+        </div>
+
+        <div class="secao-titulo">🏆 Mural da Vergonha <span class="traco"></span></div>
+        <div id="lista"></div>
+      </section>
+
+      <!-- ================= ABA 2: BLACKJACK ================= -->
+      <section class="aba-conteudo" id="aba-blackjack">
+        <nav class="bj-sub" role="tablist">
+          <button role="tab" aria-selected="true"  data-bj="treino">Treino</button>
+          <button role="tab" aria-selected="false" data-bj="tabela">Tabela</button>
+          <button role="tab" aria-selected="false" data-bj="progresso">Progresso</button>
+          <button role="tab" aria-selected="false" data-bj="ajustes">Regras</button>
+        </nav>
+
+        <div class="bj-carregando" id="bjCarregando">Calculando a tabela para estas regras…</div>
+
+        <!-- treino -->
+        <div class="bj-tela ativa" id="bj-treino">
+          <div class="bj-placar"><b id="bjPct">—</b> de acerto <span id="bjMaos">· 0 mãos</span></div>
+          <div class="bj-mesa">
+            <div class="bj-quem">DEALER</div>
+            <div class="bj-mao" id="bjDealer"></div>
+            <div class="bj-espaco"></div>
+            <div class="bj-quem">SUA MÃO</div>
+            <div class="bj-mao" id="bjJogador"></div>
+            <div class="bj-total" id="bjTotal"></div>
+          </div>
+          <div class="bj-acoes" id="bjAcoes"></div>
+          <div id="bjVeredito"></div>
+        </div>
+
+        <!-- tabela -->
+        <div class="bj-tela" id="bj-tabela">
+          <p class="bj-nota" id="bjRegrasResumo" style="margin:14px 0 0;"></p>
+          <div class="secao-titulo">Mãos duras <span class="traco"></span></div>
+          <div class="bj-rolagem" id="bjTabHard"></div>
+          <div class="secao-titulo">Mãos suaves <span class="traco"></span></div>
+          <div class="bj-rolagem" id="bjTabSoft"></div>
+          <div class="secao-titulo">Pares <span class="traco"></span></div>
+          <div class="bj-rolagem" id="bjTabPar"></div>
+          <div class="bj-legenda">
+            <span><i style="background:var(--banana)"></i>Pedir</span>
+            <span><i style="background:var(--folha)"></i>Parar</span>
+            <span><i style="background:var(--bj-azul)"></i>Dobrar</span>
+            <span><i style="background:var(--bj-roxo)"></i>Separar</span>
+            <span><i style="background:var(--creme-soft)"></i>Render</span>
+            <span><i style="background:var(--casca);box-shadow:inset 0 0 0 2px var(--coral)"></i>Você já errou</span>
+          </div>
+          <p class="bj-aviso">O pontinho no canto da célula marca decisão apertada: a segunda melhor jogada perde por menos de 1 unidade a cada 100 mãos. Errar ali custa pouco. Errar numa célula sem ponto custa caro.</p>
+        </div>
+
+        <!-- progresso -->
+        <div class="bj-tela" id="bj-progresso">
+          <div class="secao-titulo">Acerto por categoria <span class="traco"></span></div>
+          <div id="bjPorCat"></div>
+          <div class="secao-titulo">Suas piores células <span class="traco"></span></div>
+          <p class="bj-nota" style="margin:0 0 8px;">Estas voltam com mais frequência no treino até virarem automáticas.</p>
+          <div class="bj-piores" id="bjPiores"></div>
+          <button class="bj-apagar" id="bjApagar">Apagar meu progresso de treino</button>
+        </div>
+
+        <!-- ajustes -->
+        <div class="bj-tela" id="bj-ajustes">
+          <div class="secao-titulo">Treino <span class="traco"></span></div>
+          <label class="cl">Nível</label>
+          <div class="bj-seg" id="bjNivel">
+            <button data-nivel="1">Iniciante</button>
+            <button data-nivel="2">Intermediário</button>
+            <button data-nivel="3">Avançado</button>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="bj-chave" data-flag="focar"><span>Focar nas decisões difíceis</span><span class="sw"></span></button>
+            <button class="bj-chave" data-flag="auto"><span>Avançar sozinho quando eu acertar</span><span class="sw"></span></button>
+          </div>
+
+          <div class="secao-titulo">Regras da mesa <span class="traco"></span></div>
+          <label class="cl">Baralhos</label>
+          <div class="bj-seg" id="bjBaralhos">
+            <button data-decks="1">1</button><button data-decks="2">2</button>
+            <button data-decks="4">4</button><button data-decks="6">6</button><button data-decks="8">8</button>
+          </div>
+          <label class="cl">Dobrar permitido em</label>
+          <div class="bj-seg" id="bjDobrar">
+            <button data-dbl="any">Qualquer 2 cartas</button>
+            <button data-dbl="9-11">9 a 11</button>
+            <button data-dbl="10-11">10 e 11</button>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="bj-chave" data-flag="hitSoft17"><span>Dealer compra em soft 17</span><span class="sw"></span></button>
+            <button class="bj-chave" data-flag="das"><span>Dobrar depois de separar</span><span class="sw"></span></button>
+            <button class="bj-chave" data-flag="surrender"><span>Render (late surrender)</span><span class="sw"></span></button>
+          </div>
+
+          <p class="bj-aviso">
+            As jogadas não vêm de tabela copiada: são recalculadas por valor esperado para as regras acima,
+            usando a composição do sapato depois de remover as cartas visíveis. Mudou uma regra, a tabela
+            inteira muda junto.<br><br>
+            Seu progresso de treino fica só neste aparelho — não vai pro Firebase e ninguém da tribo vê.<br><br>
+            Isto é material de estudo. Estratégia básica reduz a vantagem da casa para perto de 0,5%, mas não
+            a elimina e não torna o jogo lucrativo. Nenhuma mão influencia a próxima, e nenhuma aposta maior
+            recupera uma perda anterior.
+          </p>
+        </div>
+      </section>
     </div>
 
-    <button class="fab" onclick="abrirNovoMacaco()">🐒 Novo macaco</button>
+    <button class="fab" id="fabNovo" onclick="abrirNovoMacaco()">🐒 Novo macaco</button>
     <footer>Vai Pagar • v14/06 ✓ • na confiança, tudo fica no extrato 🍌</footer>
   </div>
 
@@ -231,7 +481,6 @@ function parseBRL(str){
   let s = String(str).trim().replace(/[R$\s]/g, "");
   if(!s) return 0;
   if(s.indexOf(",") > -1 && s.indexOf(".") > -1){
-    // formato 1.234,56  -> remove pontos de milhar, vírgula vira ponto
     s = s.replace(/\./g, "").replace(",", ".");
   } else if(s.indexOf(",") > -1){
     s = s.replace(",", ".");
@@ -553,6 +802,584 @@ function chuvaDeBananas(){
   setTimeout(()=>cont.remove(), 3800);
 }
 
+/* ============================================================
+   NAVEGAÇÃO ENTRE ABAS
+   ============================================================ */
+const SUBTITULOS = {
+  dividas:   "A selva dos caloteiros • mural da tribo",
+  blackjack: "Treino de estratégia básica • só seu"
+};
+let bjJaIniciou = false;
+
+document.querySelectorAll(".abas button").forEach(b => {
+  b.addEventListener("click", () => {
+    const aba = b.dataset.aba;
+    document.querySelectorAll(".abas button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+    document.querySelectorAll(".aba-conteudo").forEach(s => s.classList.remove("ativa"));
+    document.getElementById("aba-" + aba).classList.add("ativa");
+    document.getElementById("subtitulo").textContent = SUBTITULOS[aba];
+    document.getElementById("fabNovo").classList.toggle("escondido", aba !== "dividas");
+    document.body.classList.toggle("aba-bj", aba === "blackjack");
+    window.scrollTo(0, 0);
+    if (aba === "blackjack" && !bjJaIniciou) { bjJaIniciou = true; bjReconstruir(); }
+  });
+});
+
+/* ============================================================
+   ================  ABA BLACKJACK  ===========================
+   Motor determinístico de valor esperado. Sem IA, sem tabela
+   digitada: a jogada certa é a de maior EV para as regras da mesa.
+   ============================================================ */
+
+/* ---------- motor ---------- */
+function bjAdd(total, soft, r){
+  const v = r === 1 ? 11 : r;
+  let t = total + v, s = soft || r === 1;
+  if (t > 21 && s){ t -= 10; s = false; }
+  return [t, s];
+}
+function bjComposicao(decks){
+  const c = new Array(11).fill(0);
+  for (let r = 1; r <= 9; r++) c[r] = 4 * decks;
+  c[10] = 16 * decks;
+  return c;
+}
+function bjDistDealer(up, p, hitSoft17){
+  const memo = new Map();
+  function jogar(total, soft){
+    const key = total * 2 + (soft ? 1 : 0);
+    const h = memo.get(key); if (h) return h;
+    const res = {17:0,18:0,19:0,20:0,21:0,bust:0};
+    const precisaComprar = total < 17 || (total === 17 && soft && hitSoft17);
+    if (!precisaComprar){ res[total] = 1; }
+    else {
+      for (let r = 1; r <= 10; r++){
+        if (p[r] <= 0) continue;
+        const [nt, ns] = bjAdd(total, soft, r);
+        if (nt > 21){ res.bust += p[r]; continue; }
+        const sub = jogar(nt, ns);
+        res[17]+=p[r]*sub[17]; res[18]+=p[r]*sub[18]; res[19]+=p[r]*sub[19];
+        res[20]+=p[r]*sub[20]; res[21]+=p[r]*sub[21]; res.bust+=p[r]*sub.bust;
+      }
+    }
+    memo.set(key, res); return res;
+  }
+  // o dealer já espiou a carta fechada: blackjack do dealer está fora da conta
+  const fechada = p.slice();
+  if (up === 1)  fechada[10] = 0;
+  if (up === 10) fechada[1]  = 0;
+  const norm = fechada.reduce((a,b)=>a+b, 0);
+  const out = {17:0,18:0,19:0,20:0,21:0,bust:0};
+  const ini = up === 1 ? [11, true] : [up, false];
+  for (let r = 1; r <= 10; r++){
+    if (fechada[r] <= 0) continue;
+    const w = fechada[r] / norm;
+    const [nt, ns] = bjAdd(ini[0], ini[1], r);
+    const sub = jogar(nt, ns);
+    out[17]+=w*sub[17]; out[18]+=w*sub[18]; out[19]+=w*sub[19];
+    out[20]+=w*sub[20]; out[21]+=w*sub[21]; out.bust+=w*sub.bust;
+  }
+  return out;
+}
+function bjPodeDobrar(total, soft, regras){
+  if (regras.doubleOn === "any") return true;
+  if (soft) return false;
+  if (regras.doubleOn === "9-11")  return total >= 9  && total <= 11;
+  return total >= 10 && total <= 11;
+}
+function bjDecidir(cartas, up, regras, opcoes){
+  opcoes = opcoes || {};
+  const comp = bjComposicao(regras.decks);
+  for (const c of cartas) comp[c]--;
+  comp[up]--;
+  const tot = comp.reduce((a,b)=>a+b, 0);
+  const p = new Array(11).fill(0);
+  for (let r = 1; r <= 10; r++) p[r] = comp[r] / tot;
+
+  const dist = bjDistDealer(up, p, regras.hitSoft17);
+  let total = 0, soft = false;
+  for (const c of cartas){ const [t,s] = bjAdd(total, soft, c); total = t; soft = s; }
+
+  function evParar(t){
+    if (t > 21) return -1;
+    let ev = dist.bust;
+    for (const k of [17,18,19,20,21]){ if (t > k) ev += dist[k]; else if (t < k) ev -= dist[k]; }
+    return ev;
+  }
+  const memoH = new Map();
+  function evPedir(t, s){
+    const key = t*2 + (s?1:0);
+    const c = memoH.get(key); if (c !== undefined) return c;
+    let ev = 0;
+    for (let r = 1; r <= 10; r++){
+      if (p[r] <= 0) continue;
+      const [nt, ns] = bjAdd(t, s, r);
+      ev += p[r] * (nt > 21 ? -1 : Math.max(evParar(nt), evPedir(nt, ns)));
+    }
+    memoH.set(key, ev); return ev;
+  }
+  function evDobrar(t, s){
+    let ev = 0;
+    for (let r = 1; r <= 10; r++){
+      if (p[r] <= 0) continue;
+      const [nt] = bjAdd(t, s, r);
+      ev += p[r] * 2 * evParar(nt);
+    }
+    return ev;
+  }
+  function evSeparar(rank){
+    let uma = 0;
+    for (let r = 1; r <= 10; r++){
+      if (p[r] <= 0) continue;
+      const [nt, ns] = bjAdd(rank === 1 ? 11 : rank, rank === 1, r);
+      let melhor;
+      if (rank === 1) melhor = evParar(nt);            // ás separado recebe uma carta só
+      else {
+        melhor = Math.max(evParar(nt), evPedir(nt, ns));
+        if (regras.das && bjPodeDobrar(nt, ns, regras)) melhor = Math.max(melhor, evDobrar(nt, ns));
+      }
+      uma += p[r] * melhor;
+    }
+    return 2 * uma;
+  }
+  let estouroSePedir = 0;
+  for (let r = 1; r <= 10; r++){
+    if (p[r] <= 0) continue;
+    const [nt] = bjAdd(total, soft, r);
+    if (nt > 21) estouroSePedir += p[r];
+  }
+
+  const ehPar = !opcoes.semPar && cartas.length === 2 && cartas[0] === cartas[1];
+  const evs = { stand: evParar(total), hit: evPedir(total, soft) };
+  if (bjPodeDobrar(total, soft, regras)) evs.double = evDobrar(total, soft);
+  if (ehPar) evs.split = evSeparar(cartas[0]);
+  if (regras.surrender) evs.surrender = -0.5;
+
+  const ordenado = Object.entries(evs).sort((a,b)=>b[1]-a[1]);
+  return {
+    total, soft, ehPar, evs, ordenado,
+    melhor: ordenado[0][0],
+    margem: ordenado[0][1] - (ordenado[1] ? ordenado[1][1] : ordenado[0][1]),
+    dealerEstoura: dist.bust,
+    dealerFecha: 1 - dist.bust,
+    estouroSePedir
+  };
+}
+
+/* ---------- estado ---------- */
+const BJ_NOME  = {stand:"PARAR", hit:"PEDIR", double:"DOBRAR", split:"SEPARAR", surrender:"RENDER"};
+const BJ_ORDEM = ["hit","stand","double","split","surrender"];
+const BJ_CHAVE = "vaipagar_bj_v1";
+const BJ_APERTADO = 0.01;
+
+const BJ_PADRAO = {
+  regras:{decks:6, hitSoft17:false, das:true, surrender:true, doubleOn:"any"},
+  nivel:2, focar:true, auto:true,
+  stats:{hard:[0,0], soft:[0,0], pair:[0,0]},
+  erros:{}
+};
+let BJ = bjCarregar();
+function bjCarregar(){
+  const base = JSON.parse(JSON.stringify(BJ_PADRAO));
+  try{
+    const raw = localStorage.getItem(BJ_CHAVE);
+    if (!raw) return base;
+    const o = JSON.parse(raw);
+    return Object.assign(base, o, {
+      regras: Object.assign({}, BJ_PADRAO.regras, o.regras || {}),
+      stats:  Object.assign({}, BJ_PADRAO.stats,  o.stats  || {})
+    });
+  }catch(e){ return base; }
+}
+function bjSalvar(){ try{ localStorage.setItem(BJ_CHAVE, JSON.stringify(BJ)); }catch(e){} }
+
+function bjCartasDuras(T){
+  for (let a = 10; a >= 2; a--){ const b = T - a; if (b >= 2 && b <= 10 && a !== b) return [a,b]; }
+  return [Math.floor(T/2), Math.ceil(T/2)];
+}
+function bjVariacoesDuras(T){
+  const out = [];
+  for (let a = 2; a <= 10; a++){ const b = T - a; if (b >= 2 && b <= 10 && a < b) out.push([a,b]); }
+  return out.length ? out : [bjCartasDuras(T)];
+}
+const BJ_CELULAS = (function(){
+  const L = [];
+  for (let t = 5; t <= 20; t++) L.push({cat:"hard", chave:"H"+t, rot:String(t), total:t});
+  for (let x = 2; x <= 9;  x++) L.push({cat:"soft", chave:"S"+(11+x), rot:"A,"+x, total:11+x});
+  L.push({cat:"pair", chave:"PA", rot:"A,A", rank:1});
+  for (let r = 2; r <= 10; r++) L.push({cat:"pair", chave:"P"+r, rot:r+","+r, rank:r});
+  return L;
+})();
+
+let BJ_TABELA = null;
+let bjMao = null;
+let bjRespondida = false;
+const bjFila = [];
+
+function bjRepresentante(cel){
+  if (cel.cat === "hard") return bjCartasDuras(cel.total);
+  if (cel.cat === "soft") return [1, cel.total - 11];
+  return [cel.rank, cel.rank];
+}
+function bjCartasDaCelula(cel){
+  if (cel.cat === "hard"){
+    const v = bjVariacoesDuras(cel.total);
+    return v[Math.floor(Math.random()*v.length)].slice();
+  }
+  if (cel.cat === "soft") return [1, cel.total - 11];
+  return [cel.rank, cel.rank];
+}
+function bjConstruirTabela(pronto){
+  const out = {};
+  let i = 0;
+  const carregando = document.getElementById("bjCarregando");
+  carregando.hidden = false;
+  function lote(){
+    const t0 = performance.now();
+    while (i < BJ_CELULAS.length && performance.now() - t0 < 22){
+      const cel = BJ_CELULAS[i];
+      const cartas = bjRepresentante(cel);
+      const linha = [];
+      for (let up = 1; up <= 10; up++){
+        const d = bjDecidir(cartas, up, BJ.regras, {semPar: cel.cat !== "pair"});
+        linha[up] = {melhor:d.melhor, margem:d.margem};
+      }
+      out[cel.chave] = linha;
+      i++;
+    }
+    if (i < BJ_CELULAS.length) requestAnimationFrame(lote);
+    else { BJ_TABELA = out; carregando.hidden = true; if (pronto) pronto(); }
+  }
+  requestAnimationFrame(lote);
+}
+
+/* ---------- sorteio ---------- */
+function bjCategorias(){
+  if (BJ.nivel === 1) return ["hard"];
+  if (BJ.nivel === 2) return ["hard","soft"];
+  return ["hard","soft","pair"];
+}
+function bjSortearCelula(){
+  if (bjFila.length && Math.random() < 0.28){
+    const item = bjFila.shift();
+    if (--item.espera <= 0) return item.cel;
+    bjFila.push(item);
+  }
+  const cats = bjCategorias();
+  const pool = BJ_CELULAS.filter(c => cats.includes(c.cat));
+  if (!BJ.focar) return pool[Math.floor(Math.random()*pool.length)];
+  const pesos = [];
+  let soma = 0;
+  for (const c of pool){
+    const linha = BJ_TABELA[c.chave];
+    for (let up = 1; up <= 10; up++){
+      const w = Math.min(6, 1 + 0.9/(linha[up].margem + 0.015));
+      pesos.push([c, up, w]); soma += w;
+    }
+  }
+  let x = Math.random() * soma;
+  for (const w of pesos){ x -= w[2]; if (x <= 0) return Object.assign({}, w[0], {forcarUp:w[1]}); }
+  return pool[0];
+}
+const BJ_NAIPES = [["♠",0],["♥",1],["♦",1],["♣",0]];
+function bjNaipe(){ return BJ_NAIPES[Math.floor(Math.random()*4)]; }
+function bjFigura(r){
+  if (r === 1) return "A";
+  if (r < 10) return String(r);
+  return ["10","J","Q","K"][Math.floor(Math.random()*4)];
+}
+function bjNovaMao(){
+  const cel = bjSortearCelula();
+  const cartas = bjCartasDaCelula(cel);
+  const up = cel.forcarUp || (1 + Math.floor(Math.random()*10));
+  const d = bjDecidir(cartas, up, BJ.regras);
+  bjMao = {cel, cartas, up, d,
+           naipes:[bjNaipe(), bjNaipe()], naipeUp:bjNaipe(),
+           figs:[bjFigura(cartas[0]), bjFigura(cartas[1])], figUp:bjFigura(up)};
+  bjRespondida = false;
+  bjRenderMao();
+}
+
+/* ---------- render ---------- */
+function bjCartaEl(fig, naipe){
+  const d = document.createElement("div");
+  d.className = "bj-carta" + (naipe[1] ? " vermelha" : "");
+  d.innerHTML = '<span class="p">'+fig+naipe[0]+'</span><span class="n">'+fig+'</span>'
+              + '<span class="p br">'+fig+naipe[0]+'</span>';
+  return d;
+}
+function bjRenderMao(){
+  const dl = document.getElementById("bjDealer");
+  const jg = document.getElementById("bjJogador");
+  dl.innerHTML = ""; jg.innerHTML = "";
+  dl.appendChild(bjCartaEl(bjMao.figUp, bjMao.naipeUp));
+  jg.appendChild(bjCartaEl(bjMao.figs[0], bjMao.naipes[0]));
+  jg.appendChild(bjCartaEl(bjMao.figs[1], bjMao.naipes[1]));
+
+  const d = bjMao.d;
+  document.getElementById("bjTotal").innerHTML =
+    d.ehPar ? "par de " + bjMao.figs[0] + " · <b>" + d.total + "</b>"
+            : (d.soft ? "soft" : "hard") + " <b>" + d.total + "</b>";
+
+  const cx = document.getElementById("bjAcoes");
+  cx.innerHTML = "";
+  BJ_ORDEM.forEach(a => {
+    if (a === "split" && !d.ehPar) return;
+    if (a === "double" && d.evs.double === undefined) return;
+    if (a === "surrender" && !BJ.regras.surrender) return;
+    const b = document.createElement("button");
+    b.className = "bj-act"; b.dataset.a = a;
+    b.innerHTML = BJ_NOME[a] + '<i>' + (BJ_ORDEM.indexOf(a)+1) + '</i>';
+    b.onclick = () => bjResponder(a);
+    cx.appendChild(b);
+  });
+  document.getElementById("bjVeredito").innerHTML = "";
+  bjAtualizarPlacar();
+}
+function bjFmt(x){ return (x >= 0 ? "+" : "−") + Math.abs(x*100).toFixed(1); }
+
+function bjResponder(a){
+  if (bjRespondida) return;
+  bjRespondida = true;
+  const d = bjMao.d, cel = bjMao.cel, up = bjMao.up;
+  const acertou = a === d.melhor;
+  const cat = d.ehPar ? "pair" : (d.soft ? "soft" : "hard");
+  BJ.stats[cat][1]++; if (acertou) BJ.stats[cat][0]++;
+
+  const ck = cel.chave + "|" + up;
+  if (!acertou){
+    BJ.erros[ck] = (BJ.erros[ck] || 0) + 1;
+    bjFila.push({cel: Object.assign({}, cel, {forcarUp:up}), espera:3});
+    if (bjFila.length > 24) bjFila.shift();
+  } else if (BJ.erros[ck]){
+    BJ.erros[ck] -= 0.5;
+    if (BJ.erros[ck] < 0.5) delete BJ.erros[ck];
+  }
+  bjSalvar();
+
+  document.querySelectorAll(".bj-act").forEach(b => b.disabled = true);
+  bjMostrarVeredito(a, acertou);
+  bjAtualizarPlacar();
+  if (acertou && BJ.auto && d.margem >= BJ_APERTADO){
+    setTimeout(() => { if (bjRespondida) bjNovaMao(); }, 850);
+  }
+}
+function bjMostrarVeredito(a, acertou){
+  const d = bjMao.d;
+  const custo = (d.evs[d.melhor] - d.evs[a]) * 100;
+  const apertado = d.margem < BJ_APERTADO;
+
+  let h = '<div class="bj-veredito">'
+    + '<div class="bj-vtopo ' + (acertou ? "ok" : "erro") + '">'
+    +   (acertou ? "Certo · " + BJ_NOME[a] : "A jogada é " + BJ_NOME[d.melhor])
+    +   '<span>' + (acertou ? "" : "você marcou " + BJ_NOME[a]) + '</span>'
+    + '</div><div class="bj-vcorpo">';
+  if (!acertou){
+    h += '<p class="bj-custo">' + BJ_NOME[a] + ' custa <b>' + custo.toFixed(1)
+       + ' unidades a cada 100 mãos</b> em relação a ' + BJ_NOME[d.melhor] + '.</p>';
+  }
+  h += '<p>' + bjPorque(d, a) + '</p>';
+  if (apertado) h += '<p><span class="bj-apertado">decisão apertada</span></p>';
+  h += bjBarrasEV(d, a);
+  h += '<p class="bj-nota">Valor esperado por 100 unidades apostadas, nas suas regras de mesa. '
+     + '0 = sai no zero; −100 = perde a aposta inteira.</p>';
+  h += '</div><button class="bj-prox" id="bjProx">Próxima mão 🃏</button></div>';
+
+  document.getElementById("bjVeredito").innerHTML = h;
+  document.getElementById("bjProx").onclick = bjNovaMao;
+}
+function bjBarrasEV(d, escolhida){
+  const vals = d.ordenado;
+  const max = Math.max.apply(null, vals.map(v=>v[1]));
+  const min = Math.min.apply(null, vals.map(v=>v[1]).concat([-1]));
+  const span = Math.max(0.0001, max - min);
+  const cor = {stand:"var(--folha)", hit:"var(--banana)", double:"var(--bj-azul)",
+               split:"var(--bj-roxo)", surrender:"var(--creme-soft)"};
+  let h = '<div class="bj-evs">';
+  for (const par of vals){
+    const k = par[0], v = par[1];
+    const w = Math.max(2, ((v - min)/span) * 100);
+    const anel = (k === escolhida && k !== d.melhor) ? ";box-shadow:0 0 0 1.5px var(--coral)" : "";
+    h += '<div class="bj-ev"><span class="nm" style="color:'+cor[k]+'">'+BJ_NOME[k]+'</span>'
+       + '<span class="tr"><span class="fl" style="width:'+w.toFixed(1)+'%;background:'+cor[k]+anel+'"></span></span>'
+       + '<span class="vl">'+bjFmt(v)+'</span></div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------- explicações (geradas pelo motor, não por IA) ---------- */
+function bjPct(x){ return Math.round(x*100) + "%"; }
+function bjPorque(d){
+  const up = bjMao.up;
+  const upNome = up === 1 ? "um ás" : "um " + up;
+  const melhor = d.melhor, t = d.total;
+  const estoura = bjPct(d.dealerEstoura);
+  const fecha   = bjPct(d.dealerFecha);
+  const meuBust = bjPct(d.estouroSePedir);
+  const fraco = up >= 2 && up <= 6;
+
+  if (d.ehPar){
+    const r = bjMao.cartas[0];
+    if (r === 1) return melhor === "split"
+      ? "Um par de ases vale 2 ou 12 — as duas piores mãos do jogo. Separado, cada ás começa uma mão com a melhor carta do baralho, e quase 1 em cada 3 cartas seguintes faz 21."
+      : "Com estas regras a mesa não deixa tirar proveito do split, então o par de ases é jogado como mão suave.";
+    if (r === 10) return "Vinte é a segunda melhor mão do jogo e já ganha na maioria das vezes. Separar troca uma mão quase vencedora por duas medianas — é o erro mais caro da estratégia básica, mesmo contra " + upNome + ".";
+    if (r === 5)  return "Cinco e cinco é uma mão de 10, não um par. Mão de 10 quer uma carta grande e " + (melhor === "double" ? "dobrar" : "pedir") + "; dois 5 separados começam duas mãos fracas que vão precisar comprar de novo.";
+    if (r === 4 && melhor !== "split") return "Oito é uma mão ruim, mas dois 4 separados começam duas mãos ruins. Sem poder dobrar depois de separar, o split não paga.";
+    if (r === 8)  return melhor === "split"
+      ? "Dezesseis é a pior mão dura do baralho: ou você estoura, ou para com uma mão que perde. Separar troca uma mão perdedora por duas que começam em 8 — mesmo contra " + upNome + ", perder menos já é ganhar."
+      : "Aqui o custo de separar supera o de simplesmente jogar o 16.";
+    if (r === 9 && melhor === "stand") return "Seu 18 já bate o 17 que o dealer faz com mais frequência mostrando " + up + ". Separar arrisca duas mãos de 9 numa hora em que você está na frente.";
+    if (r === 7 && melhor !== "split") return "Contra " + upNome + " o dealer é forte demais: separar só multiplica a aposta numa situação em que você já está atrás.";
+    if (melhor === "split") return "Contra " + upNome + " o dealer estoura " + estoura + " das vezes. Separar coloca mais dinheiro na mesa exatamente quando ele está fraco.";
+    return "Com " + upNome + " o dealer fecha em 17 ou mais em " + fecha + " das mãos. Não é hora de dobrar a exposição separando.";
+  }
+
+  if (d.soft){
+    if (melhor === "double") return "Com um ás na mão você não estoura ao comprar uma carta — ela é de graça. E o dealer com " + upNome + " estoura " + estoura + " das vezes. Dobrar junta as duas vantagens: você melhora sem risco e ele está no pior momento.";
+    if (melhor === "hit")    return "Soft " + t + " parece confortável, mas perde para 19, 20 e 21 — e o dealer com " + upNome + " chega a 17 ou mais em " + fecha + " das mãos. Pedir aqui não custa nada: o ás vira 1 se a carta for grande.";
+    return "Soft " + t + " já é forte o bastante contra " + upNome + ", e comprar mais uma carta piora a mão com mais frequência do que melhora.";
+  }
+
+  if (melhor === "double") return "Com " + t + ", quase metade das cartas te leva para 20 ou 21, e o dealer mostrando " + up + " estoura " + estoura + " das vezes. Dobrar é exatamente isto: apostar mais quando as duas coisas jogam a seu favor.";
+  if (melhor === "surrender") return "Nenhuma jogada aqui recupera mais do que metade da aposta: a melhor alternativa ainda perde " + Math.abs(d.ordenado[1][1]*100).toFixed(0) + " unidades a cada 100. Render devolve 50 garantidos — é a única mão em que desistir é matemática, não medo.";
+  if (melhor === "stand" && t >= 17) return "Com " + t + " você estoura " + meuBust + " das vezes ao comprar. Não existe carta que resolva isso.";
+  if (melhor === "stand" && fraco) return "Você não precisa melhorar a mão — precisa que ele quebre, e o dealer com " + up + " estoura " + estoura + " das vezes. Pedir te faria estourar " + meuBust + " e entregar a mão antes de ele jogar.";
+  if (melhor === "stand") return "Parar com " + t + " não é uma boa mão, é a menos ruim: comprar estoura " + meuBust + " das vezes.";
+  if (melhor === "hit" && fraco) return "Com " + t + " contra " + up + " o dealer só estoura " + estoura + " das vezes — não é fraco o bastante para você esperar sentado. Comprar estoura " + meuBust + ", e é o menor dos dois males.";
+  if (melhor === "hit" && t >= 12) return "O dealer com " + upNome + " fecha em 17 ou mais em " + fecha + " das mãos, então parar em " + t + " é entregar a mão. Você estoura " + meuBust + " comprando, mas parado já está perdendo.";
+  return "Com " + t + " é impossível estourar em uma carta. Comprar é de graça.";
+}
+
+/* ---------- tabela / progresso ---------- */
+const BJ_SIGLA = {stand:"P", hit:"H", double:"D", split:"SP", surrender:"R"};
+function bjTabelaHTML(cat){
+  const linhas = BJ_CELULAS.filter(c => c.cat === cat);
+  let h = '<table class="bj-tab"><thead><tr><th></th>';
+  for (const u of [1,2,3,4,5,6,7,8,9,10]) h += "<th>" + (u === 1 ? "A" : u) + "</th>";
+  h += "</tr></thead><tbody>";
+  for (const c of linhas){
+    h += '<tr><th class="lin">' + c.rot + "</th>";
+    for (let up = 1; up <= 10; up++){
+      const cel = BJ_TABELA[c.chave][up];
+      const errou = BJ.erros[c.chave + "|" + up] ? " bj-errei" : "";
+      const ap = cel.margem < BJ_APERTADO ? " bj-apert" : "";
+      h += '<td class="bj-' + cel.melhor + ap + errou + '" title="margem ' + (cel.margem*100).toFixed(1) + '">'
+         + BJ_SIGLA[cel.melhor] + "</td>";
+    }
+    h += "</tr>";
+  }
+  return h + "</tbody></table>";
+}
+function bjRenderTabela(){
+  if (!BJ_TABELA) return;
+  const r = BJ.regras;
+  document.getElementById("bjRegrasResumo").textContent =
+    r.decks + " baralho" + (r.decks > 1 ? "s" : "") + " · dealer " + (r.hitSoft17 ? "compra" : "para") +
+    " em soft 17 · " + (r.das ? "dobrar após separar" : "sem dobrar após separar") + " · " +
+    (r.surrender ? "com render" : "sem render") + " · dobrar em " +
+    (r.doubleOn === "any" ? "qualquer 2 cartas" : r.doubleOn);
+  document.getElementById("bjTabHard").innerHTML = bjTabelaHTML("hard");
+  document.getElementById("bjTabSoft").innerHTML = bjTabelaHTML("soft");
+  document.getElementById("bjTabPar").innerHTML  = bjTabelaHTML("pair");
+}
+function bjAtualizarPlacar(){
+  let ok = 0, n = 0;
+  for (const k of ["hard","soft","pair"]){ ok += BJ.stats[k][0]; n += BJ.stats[k][1]; }
+  document.getElementById("bjPct").textContent = n ? Math.round(ok/n*100) + "%" : "—";
+  document.getElementById("bjMaos").textContent = "· " + n + " mão" + (n === 1 ? "" : "s");
+}
+function bjRenderProgresso(){
+  const nomes = {hard:"Mãos duras", soft:"Mãos suaves", pair:"Pares"};
+  let h = "";
+  for (const k of ["hard","soft","pair"]){
+    const ok = BJ.stats[k][0], n = BJ.stats[k][1];
+    const pc = n ? Math.round(ok/n*100) : 0;
+    h += '<div class="bj-stat"><span class="l">' + nomes[k] + '</span>'
+       + '<span class="tr"><span class="fl" style="width:' + pc + '%"></span></span>'
+       + '<span class="n">' + (n ? pc + "% · " + ok + "/" + n : "—") + "</span></div>";
+  }
+  document.getElementById("bjPorCat").innerHTML = h;
+
+  const itens = Object.entries(BJ.erros).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const box = document.getElementById("bjPiores");
+  if (!itens.length){
+    box.innerHTML = '<p class="bj-vazio">Nada por aqui ainda. Cada erro no treino entra nesta lista e volta a aparecer até virar automático.</p>';
+    return;
+  }
+  box.innerHTML = itens.map(function(par){
+    const partes = par[0].split("|");
+    const cel = BJ_CELULAS.find(c => c.chave === partes[0]);
+    const rot = cel ? cel.rot : partes[0];
+    const melhor = BJ_TABELA ? BJ_NOME[BJ_TABELA[partes[0]][+partes[1]].melhor] : "";
+    const q = Math.round(par[1]);
+    return '<div><span class="h">' + rot + " vs " + (partes[1] === "1" ? "A" : partes[1]) + "</span>"
+         + '<span style="color:var(--creme-soft);font-size:12.5px">' + melhor + "</span>"
+         + '<span class="r">' + q + " erro" + (q === 1 ? "" : "s") + "</span></div>";
+  }).join("");
+}
+
+/* ---------- controles ---------- */
+document.querySelectorAll(".bj-sub button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".bj-sub button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+    document.querySelectorAll(".bj-tela").forEach(t => t.classList.remove("ativa"));
+    document.getElementById("bj-" + b.dataset.bj).classList.add("ativa");
+    if (b.dataset.bj === "tabela")    bjRenderTabela();
+    if (b.dataset.bj === "progresso") bjRenderProgresso();
+    if (b.dataset.bj === "ajustes")   bjSincronizarAjustes();
+  });
+});
+function bjSincronizarAjustes(){
+  document.querySelectorAll("#bjNivel button").forEach(b =>
+    b.setAttribute("aria-pressed", String(+b.dataset.nivel === BJ.nivel)));
+  document.querySelectorAll("#bjBaralhos button").forEach(b =>
+    b.setAttribute("aria-pressed", String(+b.dataset.decks === BJ.regras.decks)));
+  document.querySelectorAll("#bjDobrar button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.dbl === BJ.regras.doubleOn)));
+  document.querySelectorAll(".bj-chave").forEach(b => {
+    const f = b.dataset.flag;
+    const v = (f in BJ.regras) ? BJ.regras[f] : BJ[f];
+    b.setAttribute("aria-pressed", String(!!v));
+  });
+}
+document.querySelectorAll("#bjNivel button").forEach(b => b.addEventListener("click", () => {
+  BJ.nivel = +b.dataset.nivel; bjSalvar(); bjSincronizarAjustes(); bjNovaMao();
+}));
+document.querySelectorAll("#bjBaralhos button").forEach(b => b.addEventListener("click", () => {
+  BJ.regras.decks = +b.dataset.decks; bjSalvar(); bjSincronizarAjustes(); bjReconstruir();
+}));
+document.querySelectorAll("#bjDobrar button").forEach(b => b.addEventListener("click", () => {
+  BJ.regras.doubleOn = b.dataset.dbl; bjSalvar(); bjSincronizarAjustes(); bjReconstruir();
+}));
+document.querySelectorAll(".bj-chave").forEach(b => b.addEventListener("click", () => {
+  const f = b.dataset.flag;
+  if (f in BJ.regras){ BJ.regras[f] = !BJ.regras[f]; bjSalvar(); bjSincronizarAjustes(); bjReconstruir(); }
+  else { BJ[f] = !BJ[f]; bjSalvar(); bjSincronizarAjustes(); }
+}));
+document.getElementById("bjApagar").addEventListener("click", () => {
+  if (!confirm("Apagar seu histórico de treino de blackjack? As dívidas da tribo não são afetadas.")) return;
+  BJ.stats = JSON.parse(JSON.stringify(BJ_PADRAO.stats));
+  BJ.erros = {}; bjFila.length = 0;
+  bjSalvar(); bjRenderProgresso(); bjAtualizarPlacar();
+  mostrarToast("Treino zerado 🃏");
+});
+document.addEventListener("keydown", e => {
+  if (overlay.classList.contains("aberto")) return;
+  if (!document.getElementById("aba-blackjack").classList.contains("ativa")) return;
+  if (!document.getElementById("bj-treino").classList.contains("ativa")) return;
+  if (e.key === " " || e.key === "Enter"){ if (bjRespondida){ e.preventDefault(); bjNovaMao(); } return; }
+  const i = parseInt(e.key, 10);
+  if (i >= 1 && i <= 5 && !bjRespondida){
+    const btn = document.querySelector('.bj-act[data-a="' + BJ_ORDEM[i-1] + '"]');
+    if (btn && !btn.disabled) btn.click();
+  }
+});
+function bjReconstruir(){
+  bjConstruirTabela(() => { bjNovaMao(); bjRenderTabela(); bjSincronizarAjustes(); });
+}
+
+/* ============================================================ */
 function iniciar(){
   if(firebaseConfig.apiKey === "COLE_AQUI"){
     document.getElementById("telaSetup").style.display = "block";
