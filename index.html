@@ -209,6 +209,61 @@
     .bj-act i{display:block;font-style:normal;font-family:'Nunito',sans-serif;font-size:10px;
       font-weight:700;color:var(--creme-soft);margin-top:2px;}
 
+    /* --- modo, sapato, saldo --- */
+    .bj-modo{display:flex;gap:3px;background:rgba(0,0,0,.2);border:1px solid var(--borda);
+      border-radius:12px;padding:3px;margin-top:14px;}
+    .bj-modo button{flex:1;border:none;background:none;cursor:pointer;color:var(--creme-soft);
+      font-weight:800;font-size:12.5px;padding:7px 4px;border-radius:9px;font-family:'Nunito',sans-serif;}
+    .bj-modo button[aria-selected="true"]{background:var(--casca-claro);color:var(--creme);}
+    .bj-metricas{display:flex;align-items:center;gap:14px;margin-top:12px;font-size:12px;
+      color:var(--creme-soft);font-weight:700;}
+    .bj-metricas b{font-family:'Baloo 2',cursive;font-size:19px;color:var(--banana);font-weight:800;}
+    .bj-metricas .sld b{font-size:17px;}
+    .bj-metricas .sld.neg b{color:var(--coral);}
+    .bj-metricas .sld.pos b{color:var(--folha);}
+    .bj-sapato{flex:1;min-width:40px;height:6px;background:rgba(0,0,0,.3);border-radius:99px;overflow:hidden;}
+    .bj-sapato i{display:block;height:100%;background:var(--casca-claro);border-radius:99px;transition:width .4s;}
+
+    /* --- carta fechada --- */
+    .bj-carta.fechada{background:linear-gradient(145deg,var(--casca-claro),var(--casca));
+      color:rgba(245,240,225,.3);border:1px solid rgba(255,210,63,.25);}
+    .bj-carta.fechada .n{font-size:30px;}
+    .bj-carta.nova{animation:bjEntra .22s ease;}
+    @keyframes bjEntra{from{transform:translateY(-14px) rotate(-6deg);opacity:0;}to{transform:none;opacity:1;}}
+
+    /* --- várias mãos (split) --- */
+    .bj-maos{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;width:100%;}
+    .bj-bloco{border:1.5px solid transparent;border-radius:14px;padding:7px 8px 6px;
+      display:flex;flex-direction:column;align-items:center;gap:3px;transition:border-color .2s;}
+    .bj-bloco.ativa{border-color:rgba(255,210,63,.55);background:rgba(255,210,63,.06);}
+    .bj-bloco.morta{opacity:.42;}
+    .bj-bloco .rot{font-size:10px;font-weight:800;color:var(--creme-soft);letter-spacing:.08em;}
+    .bj-maos.dividido .bj-carta{width:50px;height:70px;border-radius:9px;}
+    .bj-maos.dividido .bj-carta .n{font-size:27px;}
+    .bj-maos.dividido .bj-carta .p{font-size:10px;top:3px;left:4px;}
+    .bj-maos.dividido .bj-carta .p.br{bottom:3px;right:4px;}
+    .bj-selo{font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;}
+    .bj-selo.ganhou{background:rgba(74,222,128,.18);color:var(--folha);}
+    .bj-selo.perdeu{background:rgba(255,107,74,.18);color:var(--coral);}
+    .bj-selo.empate{background:rgba(245,240,225,.12);color:var(--creme-soft);}
+
+    /* --- marcador rápido de acerto --- */
+    .bj-ok-slim{margin-top:12px;padding:9px 14px;border-radius:12px;background:rgba(74,222,128,.13);
+      color:var(--folha);font-family:'Baloo 2',cursive;font-weight:800;font-size:14px;
+      display:flex;align-items:center;gap:8px;animation:sobe .18s ease;}
+    .bj-ok-slim em{margin-left:auto;font-style:normal;font-family:'Nunito',sans-serif;
+      font-size:11.5px;font-weight:700;color:var(--creme-soft);}
+
+    /* --- fim da rodada --- */
+    .bj-fim{margin-top:14px;border:1px solid var(--borda);border-radius:18px;background:var(--casca);
+      padding:14px 15px;box-shadow:var(--sombra);animation:sobe .2s ease;}
+    .bj-fim h4{font-family:'Baloo 2',cursive;font-size:19px;font-weight:800;margin-bottom:8px;}
+    .bj-fim .linha{display:flex;align-items:baseline;gap:8px;font-size:13.5px;font-weight:700;
+      padding:5px 0;border-bottom:1px solid var(--borda);}
+    .bj-fim .linha:last-of-type{border-bottom:none;}
+    .bj-fim .linha .v{margin-left:auto;font-weight:800;}
+    .bj-fim .v.pos{color:var(--folha);} .bj-fim .v.neg{color:var(--coral);} .bj-fim .v.zer{color:var(--creme-soft);}
+
     .bj-veredito{margin-top:14px;border:1px solid var(--borda);border-radius:18px;overflow:hidden;
       background:var(--casca);box-shadow:var(--sombra);animation:sobe .2s ease;}
     .bj-vtopo{padding:13px 15px;font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;
@@ -341,13 +396,23 @@
 
         <!-- treino -->
         <div class="bj-tela ativa" id="bj-treino">
-          <div class="bj-placar"><b id="bjPct">—</b> de acerto <span id="bjMaos">· 0 mãos</span></div>
+          <div class="bj-modo" role="tablist">
+            <button role="tab" aria-selected="true"  data-modo="jogo">Mão completa</button>
+            <button role="tab" aria-selected="false" data-modo="rapido">Decisão rápida</button>
+          </div>
+          <div class="bj-metricas">
+            <span><b id="bjPct">—</b> de acerto</span>
+            <span id="bjMaos">0 decisões</span>
+            <span class="sld" id="bjSaldoBox" hidden>saldo <b id="bjSaldo">0,0</b> un</span>
+            <span class="bj-sapato" id="bjSapatoBox" hidden><i id="bjSapato" style="width:100%"></i></span>
+          </div>
           <div class="bj-mesa">
             <div class="bj-quem">DEALER</div>
             <div class="bj-mao" id="bjDealer"></div>
+            <div class="bj-total" id="bjTotalDealer"></div>
             <div class="bj-espaco"></div>
-            <div class="bj-quem">SUA MÃO</div>
-            <div class="bj-mao" id="bjJogador"></div>
+            <div class="bj-quem" id="bjQuemVoce">SUA MÃO</div>
+            <div class="bj-maos" id="bjJogador"></div>
             <div class="bj-total" id="bjTotal"></div>
           </div>
           <div class="bj-acoes" id="bjAcoes"></div>
@@ -394,7 +459,7 @@
             <button data-nivel="3">Avançado</button>
           </div>
           <div style="margin-top:14px;">
-            <button class="bj-chave" data-flag="focar"><span>Focar nas decisões difíceis</span><span class="sw"></span></button>
+            <button class="bj-chave" data-flag="focar"><span>Focar nas decisões difíceis <small style="color:var(--creme-soft);font-weight:600">· só no modo decisão rápida</small></span><span class="sw"></span></button>
             <button class="bj-chave" data-flag="auto"><span>Avançar sozinho quando eu acertar</span><span class="sw"></span></button>
           </div>
 
@@ -420,6 +485,9 @@
             As jogadas não vêm de tabela copiada: são recalculadas por valor esperado para as regras acima,
             usando a composição do sapato depois de remover as cartas visíveis. Mudou uma regra, a tabela
             inteira muda junto.<br><br>
+            No modo mão completa as cartas saem de um sapato real, que vai esvaziando e embaralha quando
+            sobra 25%. Mas a correção continua sendo estratégia básica, e não jogada dependente da
+            contagem: é a tabela que você quer memorizar, não o estado momentâneo do sapato.<br><br>
             Seu progresso de treino fica só neste aparelho — não vai pro Firebase e ninguém da tribo vê.<br><br>
             Isto é material de estudo. Estratégia básica reduz a vantagem da casa para perto de 0,5%, mas não
             a elimina e não torna o jogo lucrativo. Nenhuma mão influencia a próxima, e nenhuma aposta maior
@@ -950,10 +1018,21 @@ function bjDecidir(cartas, up, regras, opcoes){
   }
 
   const ehPar = !opcoes.semPar && cartas.length === 2 && cartas[0] === cartas[1];
-  const evs = { stand: evParar(total), hit: evPedir(total, soft) };
-  if (bjPodeDobrar(total, soft, regras)) evs.double = evDobrar(total, soft);
-  if (ehPar) evs.split = evSeparar(cartas[0]);
-  if (regras.surrender) evs.surrender = -0.5;
+  // "legais" = jogadas ainda permitidas neste ponto da mão. Sem isso o motor
+  // recomendaria DOBRAR numa terceira carta, que é o erro clássico deste tipo de app.
+  const legais = opcoes.legais || (function(){
+    const L = ["stand","hit"];
+    if (bjPodeDobrar(total, soft, regras)) L.push("double");
+    if (ehPar) L.push("split");
+    if (regras.surrender) L.push("surrender");
+    return L;
+  })();
+  const evs = {};
+  if (legais.indexOf("stand") > -1)  evs.stand  = evParar(total);
+  if (legais.indexOf("hit") > -1)    evs.hit    = evPedir(total, soft);
+  if (legais.indexOf("double") > -1) evs.double = evDobrar(total, soft);
+  if (legais.indexOf("split") > -1)  evs.split  = evSeparar(cartas[0]);
+  if (legais.indexOf("surrender") > -1) evs.surrender = -0.5;
 
   const ordenado = Object.entries(evs).sort((a,b)=>b[1]-a[1]);
   return {
@@ -975,7 +1054,8 @@ const BJ_APERTADO = 0.01;
 const BJ_PADRAO = {
   regras:{decks:6, hitSoft17:false, das:true, surrender:true, doubleOn:"any"},
   nivel:2, focar:true, auto:true,
-  stats:{hard:[0,0], soft:[0,0], pair:[0,0]},
+  modo:"jogo", saldo:0, rodadas:0,
+  stats:{hard:[0,0], soft:[0,0], pair:[0,0], seguro:[0,0]},
   erros:{}
 };
 let BJ = bjCarregar();
@@ -1053,7 +1133,73 @@ function bjConstruirTabela(pronto){
   requestAnimationFrame(lote);
 }
 
-/* ---------- sorteio ---------- */
+/* ---------- utilidades de mão ---------- */
+function bjTotal(ranks){
+  let t = 0, s = false;
+  for (const r of ranks){ const par = bjAdd(t, s, r); t = par[0]; s = par[1]; }
+  return {total:t, soft:s};
+}
+function bjRanks(cartas){ return cartas.map(function(c){ return c.r; }); }
+function bjChaveCel(ranks, parInicial){
+  if (parInicial) return ranks[0] === 1 ? "PA" : "P" + ranks[0];
+  const t = bjTotal(ranks);
+  return (t.soft ? "S" : "H") + t.total;
+}
+function bjCategoria(ranks, parInicial){
+  if (parInicial) return "pair";
+  return bjTotal(ranks).soft ? "soft" : "hard";
+}
+
+const BJ_NAIPES = [["♠",0],["♥",1],["♦",1],["♣",0]];
+function bjNaipe(){ return BJ_NAIPES[Math.floor(Math.random()*4)]; }
+function bjFigura(r){
+  if (r === 1) return "A";
+  if (r < 10) return String(r);
+  return ["10","J","Q","K"][Math.floor(Math.random()*4)];
+}
+function bjCarta(r){ return {r:r, fig:bjFigura(r), naipe:bjNaipe()}; }
+
+/* ---------- desenho ---------- */
+function bjCartaEl(c, nova){
+  const d = document.createElement("div");
+  d.className = "bj-carta" + (c.naipe[1] ? " vermelha" : "") + (nova ? " nova" : "");
+  d.innerHTML = '<span class="p">'+c.fig+c.naipe[0]+'</span><span class="n">'+c.fig+'</span>'
+              + '<span class="p br">'+c.fig+c.naipe[0]+'</span>';
+  return d;
+}
+function bjCartaFechada(){
+  const d = document.createElement("div");
+  d.className = "bj-carta fechada";
+  d.innerHTML = '<span class="n">🍌</span>';
+  return d;
+}
+function bjTextoTotal(ranks, parInicial){
+  const t = bjTotal(ranks);
+  if (parInicial) return "par · <b>" + t.total + "</b>";
+  if (t.total > 21) return '<b style="color:var(--coral)">estourou</b>';
+  return (t.soft ? "soft" : "hard") + " <b>" + t.total + "</b>";
+}
+function bjFmt(x){ return (x >= 0 ? "+" : "−") + Math.abs(x*100).toFixed(1); }
+function bjUn(x){ return (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(1).replace(".", ","); }
+
+function bjRenderAcoes(lista, aoClicar, desabilitado){
+  const cx = document.getElementById("bjAcoes");
+  cx.innerHTML = "";
+  lista.forEach(function(item){
+    const b = document.createElement("button");
+    b.className = "bj-act";
+    b.dataset.a = item.a;
+    b.innerHTML = item.rot + (item.tecla ? '<i>' + item.tecla + '</i>' : "");
+    b.disabled = !!desabilitado;
+    b.onclick = function(){ aoClicar(item.a); };
+    cx.appendChild(b);
+  });
+}
+
+/* =========================================================
+   MODO 1 — DECISÃO RÁPIDA (uma decisão por mão, com peso
+   nas células difíceis e repetição dos seus erros)
+   ========================================================= */
 function bjCategorias(){
   if (BJ.nivel === 1) return ["hard"];
   if (BJ.nivel === 2) return ["hard","soft"];
@@ -1066,10 +1212,9 @@ function bjSortearCelula(){
     bjFila.push(item);
   }
   const cats = bjCategorias();
-  const pool = BJ_CELULAS.filter(c => cats.includes(c.cat));
+  const pool = BJ_CELULAS.filter(function(c){ return cats.indexOf(c.cat) > -1; });
   if (!BJ.focar) return pool[Math.floor(Math.random()*pool.length)];
-  const pesos = [];
-  let soma = 0;
+  const pesos = []; let soma = 0;
   for (const c of pool){
     const linha = BJ_TABELA[c.chave];
     for (let up = 1; up <= 10; up++){
@@ -1081,117 +1226,424 @@ function bjSortearCelula(){
   for (const w of pesos){ x -= w[2]; if (x <= 0) return Object.assign({}, w[0], {forcarUp:w[1]}); }
   return pool[0];
 }
-const BJ_NAIPES = [["♠",0],["♥",1],["♦",1],["♣",0]];
-function bjNaipe(){ return BJ_NAIPES[Math.floor(Math.random()*4)]; }
-function bjFigura(r){
-  if (r === 1) return "A";
-  if (r < 10) return String(r);
-  return ["10","J","Q","K"][Math.floor(Math.random()*4)];
-}
-function bjNovaMao(){
+function bjNovaMaoRapida(){
   const cel = bjSortearCelula();
-  const cartas = bjCartasDaCelula(cel);
+  const ranks = bjCartasDaCelula(cel);
   const up = cel.forcarUp || (1 + Math.floor(Math.random()*10));
-  const d = bjDecidir(cartas, up, BJ.regras);
-  bjMao = {cel, cartas, up, d,
-           naipes:[bjNaipe(), bjNaipe()], naipeUp:bjNaipe(),
-           figs:[bjFigura(cartas[0]), bjFigura(cartas[1])], figUp:bjFigura(up)};
+  bjMao = {
+    cel: cel, ranks: ranks, up: up,
+    d: bjDecidir(ranks, up, BJ.regras),
+    cartas: ranks.map(bjCarta), cartaUp: bjCarta(up)
+  };
   bjRespondida = false;
-  bjRenderMao();
+  bjRenderRapido();
 }
-
-/* ---------- render ---------- */
-function bjCartaEl(fig, naipe){
-  const d = document.createElement("div");
-  d.className = "bj-carta" + (naipe[1] ? " vermelha" : "");
-  d.innerHTML = '<span class="p">'+fig+naipe[0]+'</span><span class="n">'+fig+'</span>'
-              + '<span class="p br">'+fig+naipe[0]+'</span>';
-  return d;
-}
-function bjRenderMao(){
+function bjRenderRapido(){
   const dl = document.getElementById("bjDealer");
-  const jg = document.getElementById("bjJogador");
-  dl.innerHTML = ""; jg.innerHTML = "";
-  dl.appendChild(bjCartaEl(bjMao.figUp, bjMao.naipeUp));
-  jg.appendChild(bjCartaEl(bjMao.figs[0], bjMao.naipes[0]));
-  jg.appendChild(bjCartaEl(bjMao.figs[1], bjMao.naipes[1]));
+  dl.innerHTML = ""; dl.appendChild(bjCartaEl(bjMao.cartaUp));
+  document.getElementById("bjTotalDealer").innerHTML = "";
 
+  const jg = document.getElementById("bjJogador");
+  jg.className = "bj-maos";
+  jg.innerHTML = "";
+  const bloco = document.createElement("div");
+  bloco.className = "bj-bloco";
+  const mao = document.createElement("div");
+  mao.className = "bj-mao";
+  bjMao.cartas.forEach(function(c){ mao.appendChild(bjCartaEl(c)); });
+  bloco.appendChild(mao);
+  jg.appendChild(bloco);
+
+  document.getElementById("bjQuemVoce").textContent = "SUA MÃO";
   const d = bjMao.d;
   document.getElementById("bjTotal").innerHTML =
-    d.ehPar ? "par de " + bjMao.figs[0] + " · <b>" + d.total + "</b>"
+    d.ehPar ? "par de " + bjMao.cartas[0].fig + " · <b>" + d.total + "</b>"
             : (d.soft ? "soft" : "hard") + " <b>" + d.total + "</b>";
 
-  const cx = document.getElementById("bjAcoes");
-  cx.innerHTML = "";
-  BJ_ORDEM.forEach(a => {
-    if (a === "split" && !d.ehPar) return;
-    if (a === "double" && d.evs.double === undefined) return;
-    if (a === "surrender" && !BJ.regras.surrender) return;
-    const b = document.createElement("button");
-    b.className = "bj-act"; b.dataset.a = a;
-    b.innerHTML = BJ_NOME[a] + '<i>' + (BJ_ORDEM.indexOf(a)+1) + '</i>';
-    b.onclick = () => bjResponder(a);
-    cx.appendChild(b);
+  const lista = [];
+  BJ_ORDEM.forEach(function(a){
+    if (d.evs[a] === undefined) return;
+    lista.push({a:a, rot:BJ_NOME[a], tecla:BJ_ORDEM.indexOf(a)+1});
   });
+  bjRenderAcoes(lista, bjResponderRapido);
   document.getElementById("bjVeredito").innerHTML = "";
   bjAtualizarPlacar();
 }
-function bjFmt(x){ return (x >= 0 ? "+" : "−") + Math.abs(x*100).toFixed(1); }
-
-function bjResponder(a){
+function bjResponderRapido(a){
   if (bjRespondida) return;
   bjRespondida = true;
-  const d = bjMao.d, cel = bjMao.cel, up = bjMao.up;
+  const d = bjMao.d;
+  const parInicial = bjMao.ranks.length === 2 && bjMao.ranks[0] === bjMao.ranks[1];
   const acertou = a === d.melhor;
-  const cat = d.ehPar ? "pair" : (d.soft ? "soft" : "hard");
-  BJ.stats[cat][1]++; if (acertou) BJ.stats[cat][0]++;
+  bjContabilizar(bjMao.ranks, parInicial, bjMao.up, bjMao.cel.chave, acertou);
+  document.querySelectorAll(".bj-act").forEach(function(b){ b.disabled = true; });
+  bjFeedback(d, a, acertou, {up:bjMao.up, ranks:bjMao.ranks, parInicial:parInicial},
+             {rotulo:"Próxima mão 🃏", acao:bjNovaMao, sempreBotao:true});
+  bjAtualizarPlacar();
+  if (acertou && BJ.auto && d.margem >= BJ_APERTADO){
+    setTimeout(function(){ if (bjRespondida) bjNovaMao(); }, 850);
+  }
+}
 
-  const ck = cel.chave + "|" + up;
+/* =========================================================
+   MODO 2 — MÃO COMPLETA (jogo de verdade: sapato real, carta
+   por carta, split, dobra, dealer joga e a rodada liquida)
+   ========================================================= */
+let jogo = null;
+
+function bjNovoSapato(){
+  jogo.sapato = bjComposicao(BJ.regras.decks);
+  jogo.sapatoTotal = jogo.sapato.reduce(function(a,b){ return a+b; }, 0);
+}
+function bjRestante(){ return jogo.sapato.reduce(function(a,b){ return a+b; }, 0); }
+function bjPuxar(){
+  let tot = bjRestante();
+  if (tot <= 0){ bjNovoSapato(); tot = jogo.sapatoTotal; }
+  let x = Math.random() * tot;
+  for (let r = 1; r <= 10; r++){
+    x -= jogo.sapato[r];
+    if (x <= 0){ jogo.sapato[r]--; return bjCarta(r); }
+  }
+  jogo.sapato[10]--; return bjCarta(10);
+}
+function bjNovaMaoDeJogo(cartas, deSplit){
+  return {cartas:cartas, aposta:1, encerrada:false, dobrada:false,
+          deSplit:!!deSplit, rendida:false, res:null};
+}
+function bjNovaRodada(){
+  if (!jogo){ jogo = {}; bjNovoSapato(); }
+  if (bjRestante() < jogo.sapatoTotal * 0.25){
+    bjNovoSapato();
+    mostrarToast("Sapato embaralhado 🔄");
+  }
+  jogo.maos = [bjNovaMaoDeJogo([bjPuxar(), bjPuxar()])];
+  jogo.dealer = [bjPuxar(), bjPuxar()];   // [0] = carta aberta, [1] = fechada
+  jogo.ativa = 0;
+  jogo.revelado = false;
+  jogo.trava = false;
+  jogo.seguro = 0;
+  jogo.net = null;
+  jogo.nota = null;
+
+  const bjJogador = bjTotal(bjRanks(jogo.maos[0].cartas)).total === 21;
+  if (jogo.dealer[0].r === 1 && !bjJogador) jogo.fase = "seguro";
+  else bjDepoisDoPeek();
+
+  document.getElementById("bjVeredito").innerHTML = "";
+  bjRenderJogo();
+}
+function bjDepoisDoPeek(){
+  const dealerBJ  = bjTotal(bjRanks(jogo.dealer)).total === 21;
+  const jogadorBJ = bjTotal(bjRanks(jogo.maos[0].cartas)).total === 21;
+  if (dealerBJ || jogadorBJ){
+    jogo.revelado = true;
+    jogo.fase = "fim";
+    jogo.nota = dealerBJ && jogadorBJ ? "Blackjack dos dois. Empate."
+              : jogadorBJ ? "Blackjack! Paga 3:2."
+              : "Blackjack do dealer. Não havia decisão a tomar.";
+    bjLiquidar();
+    return;
+  }
+  jogo.fase = "jogando";
+}
+function bjLegais(m){
+  if (m.encerrada) return [];
+  const ranks = bjRanks(m.cartas);
+  const t = bjTotal(ranks);
+  const L = ["stand","hit"];
+  const primeira = m.cartas.length === 2;
+  if (primeira && bjPodeDobrar(t.total, t.soft, BJ.regras) && (!m.deSplit || BJ.regras.das)) L.push("double");
+  if (primeira && ranks[0] === ranks[1] && jogo.maos.length < 4 && !(m.deSplit && ranks[0] === 1)) L.push("split");
+  if (primeira && BJ.regras.surrender && !m.deSplit && jogo.maos.length === 1) L.push("surrender");
+  return L;
+}
+function bjExecutar(acao, m){
+  if (acao === "stand"){
+    m.encerrada = true;
+  } else if (acao === "hit"){
+    m.cartas.push(bjPuxar());
+    if (bjTotal(bjRanks(m.cartas)).total >= 21) m.encerrada = true;
+  } else if (acao === "double"){
+    m.aposta = 2; m.dobrada = true;
+    m.cartas.push(bjPuxar());
+    m.encerrada = true;
+  } else if (acao === "surrender"){
+    m.rendida = true; m.encerrada = true; m.res = -0.5;
+  } else if (acao === "split"){
+    const r = bjRanks(m.cartas)[0];
+    const nova = bjNovaMaoDeJogo([m.cartas.pop()], true);
+    m.deSplit = true;
+    m.cartas.push(bjPuxar());
+    nova.cartas.push(bjPuxar());
+    if (r === 1){ m.encerrada = true; nova.encerrada = true; }
+    else {
+      if (bjTotal(bjRanks(m.cartas)).total === 21) m.encerrada = true;
+      if (bjTotal(bjRanks(nova.cartas)).total === 21) nova.encerrada = true;
+    }
+    jogo.maos.splice(jogo.ativa + 1, 0, nova);
+  }
+}
+function bjAvancar(){
+  while (jogo.ativa < jogo.maos.length && jogo.maos[jogo.ativa].encerrada) jogo.ativa++;
+  if (jogo.ativa >= jogo.maos.length) bjDealerJoga();
+}
+function bjDealerJoga(){
+  jogo.revelado = true;
+  const algumaViva = jogo.maos.some(function(m){
+    return !m.rendida && bjTotal(bjRanks(m.cartas)).total <= 21;
+  });
+  if (algumaViva){
+    let t = bjTotal(bjRanks(jogo.dealer));
+    while (t.total < 17 || (t.total === 17 && t.soft && BJ.regras.hitSoft17)){
+      jogo.dealer.push(bjPuxar());
+      t = bjTotal(bjRanks(jogo.dealer));
+    }
+  }
+  jogo.fase = "fim";
+  bjLiquidar();
+}
+function bjLiquidar(){
+  const dTot = bjTotal(bjRanks(jogo.dealer)).total;
+  const dealerBJ = jogo.dealer.length === 2 && dTot === 21;
+  let net = 0;
+  for (const m of jogo.maos){
+    if (m.res === null){
+      const t = bjTotal(bjRanks(m.cartas)).total;
+      const meuBJ = m.cartas.length === 2 && t === 21 && !m.deSplit;
+      if (t > 21)                 m.res = -m.aposta;
+      else if (meuBJ && dealerBJ) m.res = 0;
+      else if (meuBJ)             m.res = 1.5;
+      else if (dealerBJ)          m.res = -m.aposta;
+      else if (dTot > 21)         m.res = m.aposta;
+      else if (t > dTot)          m.res = m.aposta;
+      else if (t === dTot)        m.res = 0;
+      else                        m.res = -m.aposta;
+    }
+    net += m.res;
+  }
+  if (jogo.seguro > 0) net += dealerBJ ? jogo.seguro * 2 : -jogo.seguro;
+  jogo.net = net;
+  BJ.saldo = Math.round((BJ.saldo + net) * 100) / 100;
+  BJ.rodadas++;
+  bjSalvar();
+}
+
+function bjRenderJogo(){
+  /* dealer */
+  const dl = document.getElementById("bjDealer");
+  dl.innerHTML = "";
+  dl.appendChild(bjCartaEl(jogo.dealer[0]));
+  if (!jogo.revelado) dl.appendChild(bjCartaFechada());
+  else for (let i = 1; i < jogo.dealer.length; i++) dl.appendChild(bjCartaEl(jogo.dealer[i]));
+  document.getElementById("bjTotalDealer").innerHTML =
+    jogo.revelado ? bjTextoTotal(bjRanks(jogo.dealer), false) : "carta fechada";
+
+  /* mãos do jogador */
+  const jg = document.getElementById("bjJogador");
+  jg.className = "bj-maos" + (jogo.maos.length > 1 ? " dividido" : "");
+  jg.innerHTML = "";
+  jogo.maos.forEach(function(m, i){
+    const ranks = bjRanks(m.cartas);
+    const t = bjTotal(ranks);
+    const ativa = (i === jogo.ativa && jogo.fase === "jogando");
+    const bloco = document.createElement("div");
+    bloco.className = "bj-bloco" + (ativa ? " ativa" : "")
+                    + ((t.total > 21 || m.rendida) ? " morta" : "");
+    const linha = document.createElement("div");
+    linha.className = "bj-mao";
+    m.cartas.forEach(function(c){ linha.appendChild(bjCartaEl(c)); });
+    bloco.appendChild(linha);
+
+    const rot = document.createElement("div");
+    rot.className = "rot";
+    let txt = (t.total > 21 ? "estourou" : t.total) + (m.dobrada ? " · dobrada" : "") + (m.rendida ? " · rendida" : "");
+    if (jogo.maos.length > 1) txt = "mão " + (i+1) + " · " + txt;
+    rot.textContent = txt;
+    bloco.appendChild(rot);
+
+    if (m.res !== null && jogo.fase === "fim"){
+      const s = document.createElement("span");
+      s.className = "bj-selo " + (m.res > 0 ? "ganhou" : m.res < 0 ? "perdeu" : "empate");
+      s.textContent = m.res > 0 ? "ganhou " + bjUn(m.res) : m.res < 0 ? "perdeu " + bjUn(m.res) : "empate";
+      bloco.appendChild(s);
+    }
+    jg.appendChild(bloco);
+  });
+
+  document.getElementById("bjQuemVoce").textContent = jogo.maos.length > 1 ? "SUAS MÃOS" : "SUA MÃO";
+  const ativa = jogo.maos[Math.min(jogo.ativa, jogo.maos.length - 1)];
+  document.getElementById("bjTotal").innerHTML =
+    (jogo.fase === "jogando" && jogo.maos.length === 1)
+      ? bjTextoTotal(bjRanks(ativa.cartas), ativa.cartas.length === 2 && ativa.cartas[0].r === ativa.cartas[1].r)
+      : "";
+
+  /* botões */
+  if (jogo.fase === "seguro"){
+    bjRenderAcoes([
+      {a:"nao", rot:"RECUSAR SEGURO", tecla:1},
+      {a:"sim", rot:"FAZER SEGURO",   tecla:2}
+    ], bjResponderSeguro, jogo.trava);
+  } else if (jogo.fase === "jogando"){
+    const legais = bjLegais(jogo.maos[jogo.ativa]);
+    const lista = [];
+    BJ_ORDEM.forEach(function(a){
+      if (legais.indexOf(a) > -1) lista.push({a:a, rot:BJ_NOME[a], tecla:BJ_ORDEM.indexOf(a)+1});
+    });
+    bjRenderAcoes(lista, bjResponderJogo, jogo.trava);
+  } else {
+    document.getElementById("bjAcoes").innerHTML = "";
+    bjMostrarFimDeRodada();
+  }
+  bjAtualizarPlacar();
+}
+
+function bjResponderSeguro(a){
+  if (jogo.trava) return;
+  const ranks = bjRanks(jogo.maos[0].cartas);
+  const comp = bjComposicao(BJ.regras.decks);
+  for (const r of ranks) comp[r]--;
+  comp[1]--;
+  const totalCartas = comp.reduce(function(x,y){ return x+y; }, 0);
+  const pDez = comp[10] / totalCartas;
+  const acertou = (a === "nao");
+
+  BJ.stats.seguro[1]++; if (acertou) BJ.stats.seguro[0]++;
+  bjSalvar();
+
+  if (a === "sim") jogo.seguro = 0.5;
+  bjDepoisDoPeek();
+
+  const ev = (pDez * 2 - (1 - pDez)) * 0.5;   // por unidade da aposta principal
+  const txt = "O seguro paga 2:1, então só compensa se a carta fechada for 10 em mais de 1 vez a cada 3. "
+            + "Aqui a chance é de " + (pDez*100).toFixed(1) + "%. Fazer seguro custa "
+            + Math.abs(ev*100).toFixed(1) + " unidades a cada 100 mãos — é a pior aposta da mesa, "
+            + "e vale até quando você tem blackjack (o \"even money\" é o mesmo seguro com outro nome). "
+            + "Só vira boa com contagem de cartas, que a estratégia básica não usa.";
+
+  bjRenderJogo();
+  bjFeedbackSimples(acertou,
+    acertou ? "Certo · recusar o seguro" : "A jogada é RECUSAR SEGURO",
+    txt);
+}
+
+function bjResponderJogo(a){
+  if (jogo.trava || jogo.fase !== "jogando") return;
+  const m = jogo.maos[jogo.ativa];
+  const ranks = bjRanks(m.cartas);
+  const parInicial = m.cartas.length === 2 && ranks[0] === ranks[1];
+  const legais = bjLegais(m);
+  const d = bjDecidir(ranks, jogo.dealer[0].r, BJ.regras, {legais:legais});
+  const acertou = a === d.melhor;
+
+  bjContabilizar(ranks, parInicial, jogo.dealer[0].r, bjChaveCel(ranks, parInicial), acertou);
+  bjExecutar(a, m);
+  bjAvancar();
+  bjRenderJogo();
+  bjFeedback(d, a, acertou, {up:jogo.dealer[0].r, ranks:ranks, parInicial:parInicial},
+             {rotulo:"Continuar", acao:bjDestravar, sempreBotao:false});
+}
+function bjDestravar(){
+  jogo.trava = false;
+  document.getElementById("bjVeredito").innerHTML = "";
+  bjRenderJogo();
+}
+function bjMostrarFimDeRodada(){
+  const cx = document.createElement("div");
+  cx.className = "bj-fim";
+  const net = jogo.net || 0;
+  let h = "<h4>" + (net > 0 ? "Rodada ganha" : net < 0 ? "Rodada perdida" : "Empate") + "</h4>";
+  if (jogo.nota) h += '<p class="bj-nota" style="margin:0 0 8px">' + jogo.nota + "</p>";
+  jogo.maos.forEach(function(m, i){
+    const t = bjTotal(bjRanks(m.cartas)).total;
+    const cls = m.res > 0 ? "pos" : m.res < 0 ? "neg" : "zer";
+    h += '<div class="linha"><span>' + (jogo.maos.length > 1 ? "Mão " + (i+1) + ": " : "Sua mão: ")
+       + (m.rendida ? "rendida" : t > 21 ? "estourou com " + t : t) + "</span>"
+       + '<span class="v ' + cls + '">' + bjUn(m.res) + " un</span></div>";
+  });
+  if (jogo.seguro > 0){
+    const r = bjTotal(bjRanks(jogo.dealer)).total === 21 && jogo.dealer.length === 2 ? jogo.seguro*2 : -jogo.seguro;
+    h += '<div class="linha"><span>Seguro</span><span class="v ' + (r>0?"pos":"neg") + '">' + bjUn(r) + " un</span></div>";
+  }
+  const dT = bjTotal(bjRanks(jogo.dealer)).total;
+  h += '<div class="linha"><span>Dealer: ' + (dT > 21 ? "estourou com " + dT : dT) + "</span>"
+     + '<span class="v ' + (net>0?"pos":net<0?"neg":"zer") + '">' + bjUn(net) + " un</span></div>";
+  h += '<button class="bj-prox" id="bjNovaRodada">Nova mão 🃏</button>';
+  cx.innerHTML = h;
+  document.getElementById("bjAcoes").appendChild(cx);
+  document.getElementById("bjNovaRodada").onclick = bjNovaRodada;
+}
+
+/* =========================================================
+   CORREÇÃO E EXPLICAÇÃO (as duas telas usam isto)
+   ========================================================= */
+function bjContabilizar(ranks, parInicial, up, chave, acertou){
+  const cat = bjCategoria(ranks, parInicial);
+  if (!BJ.stats[cat]) BJ.stats[cat] = [0,0];
+  BJ.stats[cat][1]++; if (acertou) BJ.stats[cat][0]++;
+  const ck = chave + "|" + up;
   if (!acertou){
     BJ.erros[ck] = (BJ.erros[ck] || 0) + 1;
-    bjFila.push({cel: Object.assign({}, cel, {forcarUp:up}), espera:3});
-    if (bjFila.length > 24) bjFila.shift();
+    const cel = BJ_CELULAS.find(function(c){ return c.chave === chave; });
+    if (cel){
+      bjFila.push({cel: Object.assign({}, cel, {forcarUp:up}), espera:3});
+      if (bjFila.length > 24) bjFila.shift();
+    }
   } else if (BJ.erros[ck]){
     BJ.erros[ck] -= 0.5;
     if (BJ.erros[ck] < 0.5) delete BJ.erros[ck];
   }
   bjSalvar();
-
-  document.querySelectorAll(".bj-act").forEach(b => b.disabled = true);
-  bjMostrarVeredito(a, acertou);
-  bjAtualizarPlacar();
-  if (acertou && BJ.auto && d.margem >= BJ_APERTADO){
-    setTimeout(() => { if (bjRespondida) bjNovaMao(); }, 850);
-  }
 }
-function bjMostrarVeredito(a, acertou){
-  const d = bjMao.d;
-  const custo = (d.evs[d.melhor] - d.evs[a]) * 100;
+function bjFeedbackSimples(acertou, titulo, texto){
+  const slot = document.getElementById("bjVeredito");
+  if (acertou && BJ.auto){
+    slot.innerHTML = '<div class="bj-ok-slim">' + titulo + "</div>";
+    return;
+  }
+  jogo.trava = true;
+  slot.innerHTML = '<div class="bj-veredito">'
+    + '<div class="bj-vtopo ' + (acertou ? "ok" : "erro") + '">' + titulo + "</div>"
+    + '<div class="bj-vcorpo"><p>' + texto + "</p></div>"
+    + '<button class="bj-prox" id="bjSeguir">Continuar</button></div>';
+  document.getElementById("bjSeguir").onclick = bjDestravar;
+  bjRenderJogo();
+}
+function bjFeedback(d, escolhida, acertou, ctx, cfg){
+  const slot = document.getElementById("bjVeredito");
+
+  if (acertou && BJ.auto && d.margem >= BJ_APERTADO && !cfg.sempreBotao){
+    slot.innerHTML = '<div class="bj-ok-slim">Certo · ' + BJ_NOME[escolhida]
+                   + "<em>margem " + (d.margem*100).toFixed(1) + " un</em></div>";
+    return;
+  }
+
+  const custo = (d.evs[d.melhor] - d.evs[escolhida]) * 100;
   const apertado = d.margem < BJ_APERTADO;
 
   let h = '<div class="bj-veredito">'
     + '<div class="bj-vtopo ' + (acertou ? "ok" : "erro") + '">'
-    +   (acertou ? "Certo · " + BJ_NOME[a] : "A jogada é " + BJ_NOME[d.melhor])
-    +   '<span>' + (acertou ? "" : "você marcou " + BJ_NOME[a]) + '</span>'
+    +   (acertou ? "Certo · " + BJ_NOME[escolhida] : "A jogada é " + BJ_NOME[d.melhor])
+    +   "<span>" + (acertou ? "" : "você marcou " + BJ_NOME[escolhida]) + "</span>"
     + '</div><div class="bj-vcorpo">';
   if (!acertou){
-    h += '<p class="bj-custo">' + BJ_NOME[a] + ' custa <b>' + custo.toFixed(1)
-       + ' unidades a cada 100 mãos</b> em relação a ' + BJ_NOME[d.melhor] + '.</p>';
+    h += '<p class="bj-custo">' + BJ_NOME[escolhida] + " custa <b>" + custo.toFixed(1)
+       + " unidades a cada 100 mãos</b> em relação a " + BJ_NOME[d.melhor] + ".</p>";
   }
-  h += '<p>' + bjPorque(d, a) + '</p>';
+  h += "<p>" + bjPorque(d, ctx) + "</p>";
   if (apertado) h += '<p><span class="bj-apertado">decisão apertada</span></p>';
-  h += bjBarrasEV(d, a);
+  h += bjBarrasEV(d, escolhida);
   h += '<p class="bj-nota">Valor esperado por 100 unidades apostadas, nas suas regras de mesa. '
-     + '0 = sai no zero; −100 = perde a aposta inteira.</p>';
-  h += '</div><button class="bj-prox" id="bjProx">Próxima mão 🃏</button></div>';
+     + "0 = sai no zero; −100 = perde a aposta inteira.</p>";
+  h += '</div><button class="bj-prox" id="bjSeguir">' + cfg.rotulo + "</button></div>";
+  slot.innerHTML = h;
+  document.getElementById("bjSeguir").onclick = cfg.acao;
 
-  document.getElementById("bjVeredito").innerHTML = h;
-  document.getElementById("bjProx").onclick = bjNovaMao;
+  if (!cfg.sempreBotao && jogo){ jogo.trava = true; bjRenderJogo(); }
 }
 function bjBarrasEV(d, escolhida){
   const vals = d.ordenado;
-  const max = Math.max.apply(null, vals.map(v=>v[1]));
-  const min = Math.min.apply(null, vals.map(v=>v[1]).concat([-1]));
+  const max = Math.max.apply(null, vals.map(function(v){ return v[1]; }));
+  const min = Math.min.apply(null, vals.map(function(v){ return v[1]; }).concat([-1]));
   const span = Math.max(0.0001, max - min);
   const cor = {stand:"var(--folha)", hit:"var(--banana)", double:"var(--bj-azul)",
                split:"var(--bj-roxo)", surrender:"var(--creme-soft)"};
@@ -1200,26 +1652,27 @@ function bjBarrasEV(d, escolhida){
     const k = par[0], v = par[1];
     const w = Math.max(2, ((v - min)/span) * 100);
     const anel = (k === escolhida && k !== d.melhor) ? ";box-shadow:0 0 0 1.5px var(--coral)" : "";
-    h += '<div class="bj-ev"><span class="nm" style="color:'+cor[k]+'">'+BJ_NOME[k]+'</span>'
-       + '<span class="tr"><span class="fl" style="width:'+w.toFixed(1)+'%;background:'+cor[k]+anel+'"></span></span>'
-       + '<span class="vl">'+bjFmt(v)+'</span></div>';
+    h += '<div class="bj-ev"><span class="nm" style="color:'+cor[k]+'">'+BJ_NOME[k]+"</span>"
+       + '<span class="tr"><span class="fl" style="width:'+w.toFixed(1)+"%;background:"+cor[k]+anel+'"></span></span>'
+       + '<span class="vl">'+bjFmt(v)+"</span></div>";
   }
-  return h + '</div>';
+  return h + "</div>";
 }
 
-/* ---------- explicações (geradas pelo motor, não por IA) ---------- */
 function bjPct(x){ return Math.round(x*100) + "%"; }
-function bjPorque(d){
-  const up = bjMao.up;
+function bjPorque(d, ctx){
+  const up = ctx.up;
+  const ranks = ctx.ranks;
   const upNome = up === 1 ? "um ás" : "um " + up;
   const melhor = d.melhor, t = d.total;
   const estoura = bjPct(d.dealerEstoura);
   const fecha   = bjPct(d.dealerFecha);
   const meuBust = bjPct(d.estouroSePedir);
   const fraco = up >= 2 && up <= 6;
+  const nCartas = ranks.length;
 
-  if (d.ehPar){
-    const r = bjMao.cartas[0];
+  if (ctx.parInicial){
+    const r = ranks[0];
     if (r === 1) return melhor === "split"
       ? "Um par de ases vale 2 ou 12 — as duas piores mãos do jogo. Separado, cada ás começa uma mão com a melhor carta do baralho, e quase 1 em cada 3 cartas seguintes faz 21."
       : "Com estas regras a mesa não deixa tirar proveito do split, então o par de ases é jogado como mão suave.";
@@ -1235,20 +1688,30 @@ function bjPorque(d){
     return "Com " + upNome + " o dealer fecha em 17 ou mais em " + fecha + " das mãos. Não é hora de dobrar a exposição separando.";
   }
 
+  const jaComprou = nCartas > 2
+    ? "Com " + nCartas + " cartas você não pode mais dobrar nem separar, então a conta é só entre pedir e parar. "
+    : "";
+
   if (d.soft){
     if (melhor === "double") return "Com um ás na mão você não estoura ao comprar uma carta — ela é de graça. E o dealer com " + upNome + " estoura " + estoura + " das vezes. Dobrar junta as duas vantagens: você melhora sem risco e ele está no pior momento.";
-    if (melhor === "hit")    return "Soft " + t + " parece confortável, mas perde para 19, 20 e 21 — e o dealer com " + upNome + " chega a 17 ou mais em " + fecha + " das mãos. Pedir aqui não custa nada: o ás vira 1 se a carta for grande.";
-    return "Soft " + t + " já é forte o bastante contra " + upNome + ", e comprar mais uma carta piora a mão com mais frequência do que melhora.";
+    if (melhor === "hit")    return jaComprou + "Soft " + t + " parece confortável, mas perde para 19, 20 e 21 — e o dealer com " + upNome + " chega a 17 ou mais em " + fecha + " das mãos. Pedir aqui não custa nada: o ás vira 1 se a carta for grande.";
+    return jaComprou + "Soft " + t + " já é forte o bastante contra " + upNome + ", e comprar mais uma carta piora a mão com mais frequência do que melhora.";
   }
 
   if (melhor === "double") return "Com " + t + ", quase metade das cartas te leva para 20 ou 21, e o dealer mostrando " + up + " estoura " + estoura + " das vezes. Dobrar é exatamente isto: apostar mais quando as duas coisas jogam a seu favor.";
   if (melhor === "surrender") return "Nenhuma jogada aqui recupera mais do que metade da aposta: a melhor alternativa ainda perde " + Math.abs(d.ordenado[1][1]*100).toFixed(0) + " unidades a cada 100. Render devolve 50 garantidos — é a única mão em que desistir é matemática, não medo.";
   if (melhor === "stand" && t >= 17) return "Com " + t + " você estoura " + meuBust + " das vezes ao comprar. Não existe carta que resolva isso.";
-  if (melhor === "stand" && fraco) return "Você não precisa melhorar a mão — precisa que ele quebre, e o dealer com " + up + " estoura " + estoura + " das vezes. Pedir te faria estourar " + meuBust + " e entregar a mão antes de ele jogar.";
-  if (melhor === "stand") return "Parar com " + t + " não é uma boa mão, é a menos ruim: comprar estoura " + meuBust + " das vezes.";
-  if (melhor === "hit" && fraco) return "Com " + t + " contra " + up + " o dealer só estoura " + estoura + " das vezes — não é fraco o bastante para você esperar sentado. Comprar estoura " + meuBust + ", e é o menor dos dois males.";
-  if (melhor === "hit" && t >= 12) return "O dealer com " + upNome + " fecha em 17 ou mais em " + fecha + " das mãos, então parar em " + t + " é entregar a mão. Você estoura " + meuBust + " comprando, mas parado já está perdendo.";
+  if (melhor === "stand" && fraco) return jaComprou + "Você não precisa melhorar a mão — precisa que ele quebre, e o dealer com " + up + " estoura " + estoura + " das vezes. Pedir te faria estourar " + meuBust + " e entregar a mão antes de ele jogar.";
+  if (melhor === "stand") return jaComprou + "Parar com " + t + " não é uma boa mão, é a menos ruim: comprar estoura " + meuBust + " das vezes.";
+  if (melhor === "hit" && fraco) return jaComprou + "Com " + t + " contra " + up + " o dealer só estoura " + estoura + " das vezes — não é fraco o bastante para você esperar sentado. Comprar estoura " + meuBust + ", e é o menor dos dois males.";
+  if (melhor === "hit" && t >= 12) return jaComprou + "O dealer com " + upNome + " fecha em 17 ou mais em " + fecha + " das mãos, então parar em " + t + " é entregar a mão. Você estoura " + meuBust + " comprando, mas parado já está perdendo.";
   return "Com " + t + " é impossível estourar em uma carta. Comprar é de graça.";
+}
+
+/* ---------- despacho entre os dois modos ---------- */
+function bjNovaMao(){
+  if (BJ.modo === "jogo") bjNovaRodada();
+  else bjNovaMaoRapida();
 }
 
 /* ---------- tabela / progresso ---------- */
@@ -1283,21 +1746,44 @@ function bjRenderTabela(){
   document.getElementById("bjTabSoft").innerHTML = bjTabelaHTML("soft");
   document.getElementById("bjTabPar").innerHTML  = bjTabelaHTML("pair");
 }
+const BJ_CATS = ["hard","soft","pair","seguro"];
 function bjAtualizarPlacar(){
   let ok = 0, n = 0;
-  for (const k of ["hard","soft","pair"]){ ok += BJ.stats[k][0]; n += BJ.stats[k][1]; }
+  for (const k of BJ_CATS){ if (!BJ.stats[k]) continue; ok += BJ.stats[k][0]; n += BJ.stats[k][1]; }
   document.getElementById("bjPct").textContent = n ? Math.round(ok/n*100) + "%" : "—";
-  document.getElementById("bjMaos").textContent = "· " + n + " mão" + (n === 1 ? "" : "s");
+  document.getElementById("bjMaos").textContent = n + " decis" + (n === 1 ? "ão" : "ões");
+
+  const emJogo = BJ.modo === "jogo";
+  const cxSaldo = document.getElementById("bjSaldoBox");
+  const cxSapato = document.getElementById("bjSapatoBox");
+  cxSaldo.hidden = !emJogo;
+  cxSapato.hidden = !emJogo;
+  if (emJogo){
+    document.getElementById("bjSaldo").textContent = bjUn(BJ.saldo);
+    cxSaldo.className = "sld " + (BJ.saldo > 0 ? "pos" : BJ.saldo < 0 ? "neg" : "");
+    const pc = jogo ? Math.max(0, Math.round(bjRestante() / jogo.sapatoTotal * 100)) : 100;
+    document.getElementById("bjSapato").style.width = pc + "%";
+    cxSapato.title = "sapato: " + pc + "% restante";
+  }
 }
 function bjRenderProgresso(){
-  const nomes = {hard:"Mãos duras", soft:"Mãos suaves", pair:"Pares"};
+  const nomes = {hard:"Mãos duras", soft:"Mãos suaves", pair:"Pares", seguro:"Seguro"};
   let h = "";
-  for (const k of ["hard","soft","pair"]){
+  for (const k of BJ_CATS){
+    if (!BJ.stats[k]) continue;
     const ok = BJ.stats[k][0], n = BJ.stats[k][1];
     const pc = n ? Math.round(ok/n*100) : 0;
     h += '<div class="bj-stat"><span class="l">' + nomes[k] + '</span>'
        + '<span class="tr"><span class="fl" style="width:' + pc + '%"></span></span>'
        + '<span class="n">' + (n ? pc + "% · " + ok + "/" + n : "—") + "</span></div>";
+  }
+  if (BJ.rodadas > 0){
+    const media = BJ.saldo / BJ.rodadas * 100;
+    h += '<p class="bj-nota" style="margin-top:12px">' + BJ.rodadas + " rodada"
+       + (BJ.rodadas === 1 ? "" : "s") + " jogadas no modo mão completa · saldo <b>" + bjUn(BJ.saldo)
+       + " unidades</b> (" + bjUn(media) + " a cada 100 mãos). Jogando tudo certo esse número fica"
+       + " perto de −0,5 no longo prazo: é a vantagem da casa, e ela não vira positiva com estratégia básica."
+       + " Em poucas centenas de mãos o que você vê é sorte, não habilidade.</p>";
   }
   document.getElementById("bjPorCat").innerHTML = h;
 
@@ -1311,7 +1797,8 @@ function bjRenderProgresso(){
     const partes = par[0].split("|");
     const cel = BJ_CELULAS.find(c => c.chave === partes[0]);
     const rot = cel ? cel.rot : partes[0];
-    const melhor = BJ_TABELA ? BJ_NOME[BJ_TABELA[partes[0]][+partes[1]].melhor] : "";
+    const linha = BJ_TABELA && BJ_TABELA[partes[0]];
+    const melhor = linha ? BJ_NOME[linha[+partes[1]].melhor] : "";
     const q = Math.round(par[1]);
     return '<div><span class="h">' + rot + " vs " + (partes[1] === "1" ? "A" : partes[1]) + "</span>"
          + '<span style="color:var(--creme-soft);font-size:12.5px">' + melhor + "</span>"
@@ -1330,6 +1817,21 @@ document.querySelectorAll(".bj-sub button").forEach(b => {
     if (b.dataset.bj === "ajustes")   bjSincronizarAjustes();
   });
 });
+document.querySelectorAll(".bj-modo button").forEach(b => {
+  b.addEventListener("click", () => {
+    if (BJ.modo === b.dataset.modo) return;
+    BJ.modo = b.dataset.modo;
+    bjSalvar();
+    bjSincronizarModo();
+    jogo = null;
+    document.getElementById("bjVeredito").innerHTML = "";
+    if (BJ_TABELA) bjNovaMao();
+  });
+});
+function bjSincronizarModo(){
+  document.querySelectorAll(".bj-modo button").forEach(b =>
+    b.setAttribute("aria-selected", String(b.dataset.modo === BJ.modo)));
+}
 function bjSincronizarAjustes(){
   document.querySelectorAll("#bjNivel button").forEach(b =>
     b.setAttribute("aria-pressed", String(+b.dataset.nivel === BJ.nivel)));
@@ -1361,6 +1863,7 @@ document.getElementById("bjApagar").addEventListener("click", () => {
   if (!confirm("Apagar seu histórico de treino de blackjack? As dívidas da tribo não são afetadas.")) return;
   BJ.stats = JSON.parse(JSON.stringify(BJ_PADRAO.stats));
   BJ.erros = {}; bjFila.length = 0;
+  BJ.saldo = 0; BJ.rodadas = 0;
   bjSalvar(); bjRenderProgresso(); bjAtualizarPlacar();
   mostrarToast("Treino zerado 🃏");
 });
@@ -1368,14 +1871,21 @@ document.addEventListener("keydown", e => {
   if (overlay.classList.contains("aberto")) return;
   if (!document.getElementById("aba-blackjack").classList.contains("ativa")) return;
   if (!document.getElementById("bj-treino").classList.contains("ativa")) return;
-  if (e.key === " " || e.key === "Enter"){ if (bjRespondida){ e.preventDefault(); bjNovaMao(); } return; }
-  const i = parseInt(e.key, 10);
-  if (i >= 1 && i <= 5 && !bjRespondida){
-    const btn = document.querySelector('.bj-act[data-a="' + BJ_ORDEM[i-1] + '"]');
-    if (btn && !btn.disabled) btn.click();
+  if (e.key === " " || e.key === "Enter"){
+    const seguir = document.getElementById("bjSeguir") || document.getElementById("bjNovaRodada");
+    if (seguir){ e.preventDefault(); seguir.click(); return; }
+    if (BJ.modo === "rapido" && bjRespondida){ e.preventDefault(); bjNovaMao(); }
+    return;
   }
+  const i = parseInt(e.key, 10);
+  if (!(i >= 1 && i <= 5)) return;
+  const botoes = document.querySelectorAll(".bj-act");
+  const alvo = botoes[i-1];
+  if (alvo && !alvo.disabled) alvo.click();
 });
 function bjReconstruir(){
+  jogo = null;
+  bjSincronizarModo();
   bjConstruirTabela(() => { bjNovaMao(); bjRenderTabela(); bjSincronizarAjustes(); });
 }
 
